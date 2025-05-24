@@ -1,0 +1,233 @@
+---
+description: 
+globs: *.vue
+alwaysApply: false
+---
+# Vue 3.5 "Tengen Toppa Gurren Lagann" - Cursor AI Rules
+
+## General
+
+- script part always first then template
+- never define emits or props type outside directly use them in 
+defineProps or defineEmits
+
+always define them like
+
+```vue
+const { 
+  modelValue, 
+  placeholder = 'Search...', 
+  disabled = false,
+  autofocus = false 
+} = defineProps<{
+  modelValue: string
+  placeholder?: string
+  disabled?: boolean
+  autofocus?: boolean
+}>()
+```
+
+## Core Vue 3.5 Principles
+- Always use Vue 3.5+ syntax and features when available
+- Prefer new APIs over legacy approaches
+- Optimize for performance and memory usage
+- Ensure SSR compatibility when applicable
+
+## Reactive Props Destructuring (Vue 3.5+)
+- **ALWAYS** use reactive props destructuring with default values instead of `withDefaults()`
+- Use native JavaScript default value syntax in `defineProps<>()`
+
+### ✅ Preferred (Vue 3.5+):
+```typescript
+const { count = 0, msg = 'hello', items = [] } = defineProps<{
+  count?: number
+  msg?: string
+  items?: string[]
+}>()
+```
+
+### ❌ Avoid (Legacy):
+```typescript
+const props = withDefaults(
+  defineProps<{ count?: number; msg?: string }>(),
+  { count: 0, msg: 'hello' }
+)
+```
+
+### Important Notes:
+- Destructured props are automatically reactive
+- When watching destructured props, wrap in getter: `watch(() => count, ...)`
+- When passing to composables, use getter: `useComposable(() => count)`
+
+## Template Refs (Vue 3.5+)
+- **ALWAYS** use `useTemplateRef()` instead of plain refs for template references
+- Supports dynamic ref bindings with runtime string IDs
+
+### ✅ Preferred (Vue 3.5+):
+```vue
+<script setup>
+import { useTemplateRef } from 'vue'
+
+const inputRef = useTemplateRef('input')
+const dynamicRef = useTemplateRef(refId) // supports dynamic IDs
+</script>
+
+<template>
+  <input ref="input">
+  <div :ref="refId">Dynamic ref</div>
+</template>
+```
+
+### ❌ Avoid (Legacy):
+```vue
+<script setup>
+import { ref } from 'vue'
+
+const inputRef = ref<HTMLInputElement>()
+</script>
+
+<template>
+  <input ref="inputRef">
+</template>
+```
+
+## Unique ID Generation (Vue 3.5+)
+- **ALWAYS** use `useId()` for generating unique IDs in SSR applications
+- Guarantees stability across server and client renders
+- Use for form elements, accessibility attributes, and any element needing unique IDs
+
+### ✅ Preferred:
+```vue
+<script setup>
+import { useId } from 'vue'
+
+const id = useId()
+const labelId = useId()
+</script>
+
+<template>
+  <form>
+    <label :for="id" :id="labelId">Name:</label>
+    <input :id="id" type="text" :aria-labelledby="labelId" />
+  </form>
+</template>
+```
+
+## SSR Hydration Improvements
+
+### Hydration Mismatch Suppression
+- Use `data-allow-mismatch` for inevitable client/server differences
+- Specify mismatch types: `text`, `children`, `class`, `style`, `attribute`
+
+```vue
+<template>
+  <!-- For dates that will always differ -->
+  <span data-allow-mismatch="text">{{ new Date().toLocaleString() }}</span>
+  
+  <!-- For specific attribute mismatches -->
+  <div data-allow-mismatch="class" :class="clientOnlyClass">Content</div>
+</template>
+```
+### Lazy Hydration
+- Use `defineAsyncComponent` with hydration strategies for performance
+- Available strategies: `hydrateOnVisible()`, `hydrateOnInteraction()`, etc.
+
+```typescript
+import { defineAsyncComponent, hydrateOnVisible, hydrateOnInteraction } from 'vue'
+
+// Hydrate when component becomes visible
+const LazyComp = defineAsyncComponent({
+  loader: () => import('./ExpensiveComponent.vue'),
+  hydrate: hydrateOnVisible()
+})
+
+// Hydrate on user interaction
+const InteractiveComp = defineAsyncComponent({
+  loader: () => import('./InteractiveComponent.vue'),
+  hydrate: hydrateOnInteraction()
+})
+```
+
+## Teleport Enhancements (Vue 3.5+)
+- Use `defer` prop when teleporting to elements rendered after the teleport
+- Enables teleporting to Vue-rendered targets
+
+### ✅ Preferred:
+```vue
+<template>
+  <Teleport defer target="#dynamic-container">
+    <div>This content will be teleported after render cycle</div>
+  </Teleport>
+  
+  <!-- This target is rendered after the Teleport -->
+  <div id="dynamic-container"></div>
+</template>
+```
+
+## Watcher Cleanup (Vue 3.5+)
+- **ALWAYS** use `onWatcherCleanup()` for side effect cleanup in watchers
+- Prevents memory leaks and stale operations
+
+### ✅ Preferred:
+```typescript
+import { watch, onWatcherCleanup } from 'vue'
+
+watch(searchQuery, (newQuery) => {
+  const controller = new AbortController()
+  
+  fetch(`/api/search?q=${newQuery}`, { 
+    signal: controller.signal 
+  }).then(handleResponse)
+  
+  onWatcherCleanup(() => {
+    controller.abort() // Cleanup previous request
+  })
+})
+```
+
+## Custom Elements (Vue 3.5+)
+- Use new custom element APIs when building web components
+- Support for app configuration, host access, and shadow DOM control
+
+```typescript
+import { defineCustomElement, useHost, useShadowRoot } from 'vue'
+
+// In custom element component
+const host = useHost()
+const shadowRoot = useShadowRoot()
+
+// When defining custom element
+defineCustomElement(MyElement, {
+  shadowRoot: false, // Disable shadow DOM if needed
+  nonce: 'security-nonce',
+  configureApp(app) {
+    app.config.errorHandler = handleError
+    app.use(somePlugin)
+  }
+})
+```
+
+## Performance Best Practices
+- Leverage Vue 3.5's optimized reactivity system (56% memory reduction)
+- Use reactive props destructuring for cleaner, more performant code
+- Implement lazy hydration for better initial page performance
+- Use `useId()` instead of manual ID generation for SSR apps
+
+## Migration Guidelines
+- Replace `withDefaults()` with destructured props + default values
+- Replace manual ref declarations with `useTemplateRef()`
+- Add proper cleanup with `onWatcherCleanup()` in watchers
+- Use `useId()` for any dynamically generated IDs in SSR contexts
+- Add `defer` prop to Teleports targeting Vue-rendered elements
+
+## Code Style
+- Prefer composition API with `<script setup>`
+- Use TypeScript for type safety
+- Import Vue 3.5 APIs explicitly: `import { useId, useTemplateRef, onWatcherCleanup } from 'vue'`
+- Maintain consistency with reactive props destructuring patterns
+
+## Error Prevention
+- Always wrap destructured props in getters when watching or passing to composables
+- Use `data-allow-mismatch` only when absolutely necessary for inevitable differences
+- Implement proper cleanup in watchers to prevent memory leaks
+- Test SSR applications for hydration mismatches 
