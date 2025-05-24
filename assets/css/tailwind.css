@@ -2,38 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-.prosa {
-    @apply text-gray-800 leading-relaxed;
+/* Bear Blog inspired prose styling */
+.prose {
+    @apply text-gray-800 leading-relaxed max-w-none;
     
+    /* Headings - minimal and clean like Bear Blog */
     h1 {
-        @apply text-4xl font-bold mb-8 mt-0 text-gray-900 leading-tight;
+        @apply text-2xl font-normal mb-6 mt-0 text-black leading-tight;
     }
     h2 {
-        @apply text-3xl font-bold mb-6 mt-12 text-gray-900 border-b border-gray-200 pb-3 leading-tight;
+        @apply text-xl font-normal mb-4 mt-8 text-black leading-tight;
     }
     h3 {
-        @apply text-2xl font-bold mb-4 mt-8 text-gray-900 leading-tight;
+        @apply text-lg font-normal mb-3 mt-6 text-black leading-tight;
     }
     h4 {
-        @apply text-xl font-semibold mb-3 mt-6 text-gray-900 leading-tight;
+        @apply text-base font-medium mb-2 mt-4 text-black leading-tight;
     }
     h5 {
-        @apply text-lg font-semibold mb-2 mt-4 text-gray-900 leading-tight;
+        @apply text-base font-medium mb-2 mt-4 text-black leading-tight;
     }
     h6 {
-        @apply text-base font-semibold mb-2 mt-4 text-gray-900 leading-tight;
+        @apply text-sm font-medium mb-2 mt-4 text-black leading-tight;
     }
     
+    /* Paragraphs - readable and spacious */
     p {
-        @apply mb-6 text-base leading-7;
+        @apply mb-4 text-base leading-relaxed text-gray-800;
     }
     
+    /* Lists - simple and clean */
     ul, ol {
-        @apply mb-6 ml-6;
+        @apply mb-4 ml-6;
     }
     
     li {
-        @apply mb-2 leading-7;
+        @apply mb-1 leading-relaxed text-gray-800;
     }
     
     ul li {
@@ -44,43 +48,69 @@
         @apply list-decimal;
     }
     
+    /* Blockquotes - minimal styling */
     blockquote {
-        @apply border-l-4 border-blue-200 pl-6 py-2 mb-6 bg-blue-50 italic text-gray-700;
+        @apply border-l-2 border-gray-300 pl-4 py-1 mb-4 italic text-gray-700;
     }
     
+    /* Code - simple gray background */
     code {
-        @apply bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm font-mono;
+        @apply bg-gray-100 text-black px-1 py-0.5 text-sm font-mono rounded-sm;
     }
     
+    /* Code blocks - minimal styling */
     pre {
-        @apply bg-gray-900 text-gray-100 p-4 rounded-lg mb-6 overflow-x-auto;
+        @apply bg-gray-100 text-black p-4 mb-4 overflow-x-auto border border-gray-200 rounded-sm;
     }
     
     pre code {
-        @apply bg-transparent text-gray-100 p-0;
+        @apply bg-transparent text-black p-0;
     }
     
+    /* Links - Bear Blog style with underlines */
     a {
-        @apply text-blue-600 hover:text-blue-800 underline transition-colors;
+        @apply text-black underline hover:no-underline;
     }
     
+    /* Images - simple and clean */
     img {
-        @apply rounded-lg shadow-md mb-6 mx-auto max-w-full h-auto;
+        @apply mb-4 mx-auto max-w-full h-auto;
     }
     
+    /* Horizontal rules - subtle */
     hr {
-        @apply border-gray-300 my-8;
+        @apply border-gray-200 my-6 border-t;
     }
     
+    /* Tables - minimal styling */
     table {
-        @apply w-full border-collapse mb-6;
+        @apply w-full border-collapse mb-4;
     }
     
     th, td {
-        @apply border border-gray-300 px-4 py-2 text-left;
+        @apply border border-gray-200 px-3 py-2 text-left;
     }
     
     th {
-        @apply bg-gray-50 font-semibold;
+        @apply bg-gray-50 font-medium;
+    }
+    
+    /* Strong text */
+    strong, b {
+        @apply font-medium text-black;
+    }
+    
+    /* Emphasis */
+    em, i {
+        @apply italic;
+    }
+    
+    /* Remove margins from first and last elements */
+    > *:first-child {
+        @apply mt-0;
+    }
+    
+    > *:last-child {
+        @apply mb-0;
     }
 }

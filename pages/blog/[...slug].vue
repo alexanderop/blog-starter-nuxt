@@ -6,10 +6,10 @@ const { data: page } = await useAsyncData(route.path, () => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 py-8">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <article class="prosa max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-8 sm:p-12">
-                <ContentRenderer :value="page" prose />
+    <div class="bg-white">
+        <div class="max-w-2xl mx-auto px-4 py-12">
+            <article class="prose prose-lg prose-gray max-w-none prose-headings:font-normal prose-headings:text-black prose-p:text-gray-800 prose-p:leading-relaxed prose-a:text-black prose-a:underline hover:prose-a:no-underline prose-strong:text-black prose-code:text-black prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded-sm prose-pre:bg-gray-100 prose-pre:border prose-pre:border-gray-200">
+                <ContentRenderer :value="page" />
             </article>
         </div>
     </div>

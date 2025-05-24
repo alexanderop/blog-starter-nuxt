@@ -1,6 +1,8 @@
 <template>
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-4xl font-bold text-gray-900 mb-8">Search</h1>
-        <p class="text-gray-600">Search functionality will be implemented here.</p>
+    <div class="py-12">
+        <div class="prose prose-lg prose-gray max-w-none prose-headings:font-normal prose-headings:text-black prose-p:text-gray-800 prose-p:leading-relaxed">
+            <h1>Search</h1>
+            <p>Search functionality will be implemented here.</p>
+        </div>
     </div>
 </template>

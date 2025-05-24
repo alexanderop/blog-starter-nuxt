@@ -1,37 +1,22 @@
 <template>
-    <div class="max-w-4xl mx-auto">
-      <h1 class="text-4xl font-bold text-gray-900 mb-8">Welcome to My Blog</h1>
-      <div class="prose prose-lg max-w-none">
-        <p class="text-xl text-gray-600 mb-6">
-          A modern blog built with Nuxt 3, Nuxt Content, and Tailwind CSS.
+    <div class="py-12">
+      <div class="prose prose-lg prose-gray max-w-none prose-headings:font-normal prose-headings:text-black prose-p:text-gray-800 prose-p:leading-relaxed prose-a:text-black prose-a:underline hover:prose-a:no-underline">
+        <h1>Welcome to My Blog</h1>
+        <p>
+          A simple, no-nonsense blog focused on content and readability. Built with Nuxt 3 and Nuxt Content.
         </p>
-        <div class="grid md:grid-cols-2 gap-6">
-          <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 class="text-xl font-semibold mb-3">📝 Latest Posts</h2>
-            <p class="text-gray-600 mb-4">
-              Discover our latest articles and insights.
-            </p>
-            <NuxtLink 
-              to="/blog" 
-              class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
-            >
-              View Blog →
-            </NuxtLink>
-          </div>
-          
-          <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h2 class="text-xl font-semibold mb-3">🔍 Search</h2>
-            <p class="text-gray-600 mb-4">
-              Find specific content with our fuzzy search.
-            </p>
-            <NuxtLink 
-              to="/search" 
-              class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Search Posts →
-            </NuxtLink>
-          </div>
-        </div>
+        
+        <h2>Navigation</h2>
+        <p>
+          <a href="/blog">→ Read the blog</a><br>
+          <a href="/search">→ Search posts</a>
+        </p>
+        
+        <hr class="my-8 border-gray-200">
+        
+        <p class="text-sm text-gray-600">
+          This blog embraces simplicity and focuses on what matters most: the content.
+        </p>
       </div>
     </div>
   </template>
