@@ -31,9 +31,6 @@
             :date="result.date"
             :tags="result.tags"
             :search-query="searchQuery"
-            :highlight-function="highlightText"
-            :format-date-function="formatDate"
-            :get-content-preview-function="getContentPreview"
           />
         </div>
       </div>
@@ -92,47 +89,6 @@ const {
   debounceDelay: 300,
   maxResults: 20
 })
-
-const escapeHtml = (str: string): string => {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-}
-
-const highlightText = (text: string, query: string): string => {
-  if (!text || !query) return text
-  
-  const escapedText = escapeHtml(text)
-  const escapedQuery = escapeHtml(query.trim())
-  
-  if (!escapedQuery) return escapedText
-  
-  const regex = new RegExp(`(${escapedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
-  
-  return escapedText.replace(regex, '<mark class="bg-yellow-400 text-gray-900 px-1 rounded">$1</mark>')
-}
-
-const formatDate = (dateString: string): string => {
-  if (!dateString) return ''
-  try {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  } catch {
-    return dateString
-  }
-}
-
-const getContentPreview = (content: string): string => {
-  if (!content) return ''
-  const cleaned = content.replace(/[#*`]/g, '').trim()
-  return cleaned.length > 150 ? cleaned.substring(0, 150) + '...' : cleaned
-}
 
 onMounted(() => {
   searchInputRef.value?.focus()

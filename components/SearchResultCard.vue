@@ -34,48 +34,70 @@ const {
   title,
   content,
   date,
-  tags = [],
+  tags,
   searchQuery = '',
-  maxTags = 3,
-  highlightFunction = (text: string, query: string) => {
-    if (!query) return text
-    const regex = new RegExp(`(${query})`, 'gi')
-    return text.replace(regex, '<mark class="bg-yellow-300 text-gray-900">$1</mark>')
-  },
-  formatDateFunction = (date: string | Date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  },
-  getContentPreviewFunction = (content: string) => {
-    const plainText = content.replace(/<[^>]*>/g, '')
-    return plainText.length > 200 ? plainText.substring(0, 200) + '...' : plainText
-  }
+  maxTags = 3
 } = defineProps<{
   to: string
   title: string
   content: string
-  date?: string | Date
-  tags?: string[]
+  date: string
+  tags: string[]
   searchQuery?: string
   maxTags?: number
-  highlightFunction?: (text: string, query: string) => string
-  formatDateFunction?: (date: string | Date) => string
-  getContentPreviewFunction?: (content: string) => string
 }>()
 
+const escapeHtml = (str: string): string => {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+const highlightText = (text: string, query: string): string => {
+  if (!text || !query) return text
+  
+  const escapedText = escapeHtml(text)
+  const escapedQuery = escapeHtml(query.trim())
+  
+  if (!escapedQuery) return escapedText
+  
+  const regex = new RegExp(`(${escapedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+  
+  return escapedText.replace(regex, '<mark class="bg-yellow-400 text-gray-900 px-1 rounded">$1</mark>')
+}
+
+const formatDate = (dateString: string | Date): string => {
+  if (!dateString) return ''
+  try {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  } catch {
+    return dateString.toString()
+  }
+}
+
+const getContentPreview = (content: string): string => {
+  if (!content) return ''
+  const cleaned = content.replace(/[#*`]/g, '').trim()
+  return cleaned.length > 150 ? cleaned.substring(0, 150) + '...' : cleaned
+}
+
 const highlightedTitle = computed(() => {
-  return highlightFunction(title, searchQuery)
+  return highlightText(title, searchQuery)
 })
 
 const highlightedContent = computed(() => {
-  const preview = getContentPreviewFunction(content)
-  return highlightFunction(preview, searchQuery)
+  const preview = getContentPreview(content)
+  return highlightText(preview, searchQuery)
 })
 
 const formattedDate = computed(() => {
-  return date ? formatDateFunction(date) : ''
+  return date ? formatDate(date) : ''
 })
 </script> 
