@@ -109,135 +109,28 @@
 </template>
 
 <script setup lang="ts">
-// Meta
-useHead({
-  title: 'Search - Blog',
-  meta: [
-    { name: 'description', content: 'Search through blog posts and articles' }
-  ]
-})
 
-// Template refs
+
 const searchInput = ref<HTMLInputElement>()
 
-// Reactive data
-const searchQuery = ref('')
-const searchResults = ref([])
-const isLoading = ref(false)
-const allSections = ref([])
+const {
+  searchQuery,
+  searchResults,
+  isLoading,
+  handleSearch,
+  clearSearch,
+  getContentPreview,
+  highlightText,
+  formatDate
+} = await useSearch({
+  collection: 'blog',
+  debounceDelay: 300,
+  maxResults: 20
+})
 
-// Auto-focus search input when page loads
 onMounted(() => {
   nextTick(() => {
     searchInput.value?.focus()
   })
 })
-
-// Fetch search data on mount
-const { data: searchData } = await useAsyncData('search-sections', () => 
-  queryCollectionSearchSections('blog')
-)
-
-allSections.value = searchData.value || []
-
-// Search functionality
-const handleSearch = useDebouncedRef(() => {
-  if (!searchQuery.value.trim()) {
-    searchResults.value = []
-    return
-  }
-
-  isLoading.value = true
-  
-  try {
-    const query = searchQuery.value.toLowerCase().trim()
-    
-    // Simple but effective search algorithm
-    const results = allSections.value
-      .map(section => {
-        let score = 0
-        const titleMatch = section.title?.toLowerCase().includes(query)
-        const contentMatch = section.content?.toLowerCase().includes(query)
-        const descriptionMatch = section.description?.toLowerCase().includes(query)
-        const tagMatch = section.tags?.some(tag => tag.toLowerCase().includes(query))
-        
-        // Scoring system
-        if (titleMatch) score += 10
-        if (descriptionMatch) score += 5
-        if (contentMatch) score += 3
-        if (tagMatch) score += 7
-        
-        return { ...section, score }
-      })
-      .filter(section => section.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 20) // Limit to 20 results
-    
-    searchResults.value = results
-  } finally {
-    isLoading.value = false
-  }
-}, 300)
-
-// Clear search function
-const clearSearch = () => {
-  searchQuery.value = ''
-  searchResults.value = []
-  isLoading.value = false
-}
-
-// Helper functions
-const getContentPreview = (content) => {
-  if (!content) return ''
-  // Remove markdown and limit to 150 characters
-  const cleaned = content.replace(/[#*`]/g, '').trim()
-  return cleaned.length > 150 ? cleaned.substring(0, 150) + '...' : cleaned
-}
-
-const highlightText = (text, query) => {
-  if (!text || !query) return text
-  
-  // Escape HTML to prevent XSS
-  const escapeHtml = (str) => {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;')
-  }
-  
-  const escapedText = escapeHtml(text)
-  const escapedQuery = escapeHtml(query.trim())
-  
-  if (!escapedQuery) return escapedText
-  
-  // Create a regex to find all instances of the search term (case-insensitive)
-  const regex = new RegExp(`(${escapedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
-  
-  // Replace with highlighted version
-  return escapedText.replace(regex, '<mark class="bg-yellow-400 text-gray-900 px-1 rounded">$1</mark>')
-}
-
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  try {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  } catch {
-    return dateString
-  }
-}
-
-// Debounced ref utility
-function useDebouncedRef(fn, delay = 300) {
-  let timeoutId
-  return () => {
-    clearTimeout(timeoutId)
-    timeoutId = setTimeout(fn, delay)
-  }
-}
 </script>
