@@ -1,0 +1,20 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/content": "^3.5.1",
+    "@nuxt/eslint": "^1.4.1",
+    "eslint": "^9.27.0",
+    "nuxt": "^3.17.4",
+    "vue": "^3.5.14",
+    "vue-router": "^4.5.1"
+  }
+}
