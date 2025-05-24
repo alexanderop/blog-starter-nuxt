@@ -9,11 +9,11 @@ const isActive = (path: string) => {
 </script>
 
 <template>
-  <header class="border-b border-gray-200 bg-white">
+  <header class="border-b border-gray-700 bg-gray-900">
     <nav class="max-w-2xl mx-auto px-4 py-6">
       <div class="flex items-center justify-between">
         <h1 class="text-lg font-normal">
-          <NuxtLink to="/" class="text-black hover:underline">
+          <NuxtLink to="/" class="text-white hover:underline">
             My Blog
           </NuxtLink>
         </h1>
@@ -24,8 +24,8 @@ const isActive = (path: string) => {
             :class="[
               'text-sm hover:underline',
               isActive('/') 
-                ? 'text-black font-medium' 
-                : 'text-gray-600'
+                ? 'text-white font-medium' 
+                : 'text-gray-400'
             ]"
           >
             Home
@@ -36,8 +36,8 @@ const isActive = (path: string) => {
             :class="[
               'text-sm hover:underline',
               isActive('/blog') 
-                ? 'text-black font-medium' 
-                : 'text-gray-600'
+                ? 'text-white font-medium' 
+                : 'text-gray-400'
             ]"
           >
             Blog
@@ -48,8 +48,8 @@ const isActive = (path: string) => {
             :class="[
               'text-sm hover:underline',
               isActive('/search') 
-                ? 'text-black font-medium' 
-                : 'text-gray-600'
+                ? 'text-white font-medium' 
+                : 'text-gray-400'
             ]"
           >
             Search

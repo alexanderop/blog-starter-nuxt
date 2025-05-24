@@ -2,33 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Bear Blog inspired prose styling */
+/* Dark mode prose styling */
 .prose {
-    @apply text-gray-800 leading-relaxed max-w-none;
+    @apply text-gray-200 leading-relaxed max-w-none;
     
-    /* Headings - minimal and clean like Bear Blog */
+    /* Headings - minimal and clean for dark mode */
     h1 {
-        @apply text-2xl font-normal mb-6 mt-0 text-black leading-tight;
+        @apply text-2xl font-normal mb-6 mt-0 text-white leading-tight;
     }
     h2 {
-        @apply text-xl font-normal mb-4 mt-8 text-black leading-tight;
+        @apply text-xl font-normal mb-4 mt-8 text-white leading-tight;
     }
     h3 {
-        @apply text-lg font-normal mb-3 mt-6 text-black leading-tight;
+        @apply text-lg font-normal mb-3 mt-6 text-white leading-tight;
     }
     h4 {
-        @apply text-base font-medium mb-2 mt-4 text-black leading-tight;
+        @apply text-base font-medium mb-2 mt-4 text-white leading-tight;
     }
     h5 {
-        @apply text-base font-medium mb-2 mt-4 text-black leading-tight;
+        @apply text-base font-medium mb-2 mt-4 text-white leading-tight;
     }
     h6 {
-        @apply text-sm font-medium mb-2 mt-4 text-black leading-tight;
+        @apply text-sm font-medium mb-2 mt-4 text-white leading-tight;
     }
     
     /* Paragraphs - readable and spacious */
     p {
-        @apply mb-4 text-base leading-relaxed text-gray-800;
+        @apply mb-4 text-base leading-relaxed text-gray-200;
     }
     
     /* Lists - simple and clean */
@@ -37,7 +37,7 @@
     }
     
     li {
-        @apply mb-1 leading-relaxed text-gray-800;
+        @apply mb-1 leading-relaxed text-gray-200;
     }
     
     ul li {
@@ -48,28 +48,28 @@
         @apply list-decimal;
     }
     
-    /* Blockquotes - minimal styling */
+    /* Blockquotes - minimal styling for dark mode */
     blockquote {
-        @apply border-l-2 border-gray-300 pl-4 py-1 mb-4 italic text-gray-700;
+        @apply border-l-2 border-gray-600 pl-4 py-1 mb-4 italic text-gray-300;
     }
     
-    /* Code - simple gray background */
+    /* Code - dark background */
     code {
-        @apply bg-gray-100 text-black px-1 py-0.5 text-sm font-mono rounded-sm;
+        @apply bg-gray-800 text-gray-100 px-1 py-0.5 text-sm font-mono rounded-sm;
     }
     
-    /* Code blocks - minimal styling */
+    /* Code blocks - dark styling */
     pre {
-        @apply bg-gray-100 text-black p-4 mb-4 overflow-x-auto border border-gray-200 rounded-sm;
+        @apply bg-gray-800 text-gray-100 p-4 mb-4 overflow-x-auto border border-gray-700 rounded-sm;
     }
     
     pre code {
-        @apply bg-transparent text-black p-0;
+        @apply bg-transparent text-gray-100 p-0;
     }
     
-    /* Links - Bear Blog style with underlines */
+    /* Links - light colored with underlines */
     a {
-        @apply text-black underline hover:no-underline;
+        @apply text-blue-400 underline hover:text-blue-300 hover:no-underline;
     }
     
     /* Images - simple and clean */
@@ -77,27 +77,27 @@
         @apply mb-4 mx-auto max-w-full h-auto;
     }
     
-    /* Horizontal rules - subtle */
+    /* Horizontal rules - subtle for dark mode */
     hr {
-        @apply border-gray-200 my-6 border-t;
+        @apply border-gray-700 my-6 border-t;
     }
     
-    /* Tables - minimal styling */
+    /* Tables - dark styling */
     table {
         @apply w-full border-collapse mb-4;
     }
     
     th, td {
-        @apply border border-gray-200 px-3 py-2 text-left;
+        @apply border border-gray-700 px-3 py-2 text-left;
     }
     
     th {
-        @apply bg-gray-50 font-medium;
+        @apply bg-gray-800 font-medium;
     }
     
     /* Strong text */
     strong, b {
-        @apply font-medium text-black;
+        @apply font-medium text-white;
     }
     
     /* Emphasis */
