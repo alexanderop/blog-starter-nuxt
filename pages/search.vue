@@ -15,6 +15,7 @@
           </svg>
         </div>
         <input
+          ref="searchInput"
           v-model="searchQuery"
           type="text"
           placeholder="Search articles..."
@@ -116,11 +117,21 @@ useHead({
   ]
 })
 
+// Template refs
+const searchInput = ref<HTMLInputElement>()
+
 // Reactive data
 const searchQuery = ref('')
 const searchResults = ref([])
 const isLoading = ref(false)
 const allSections = ref([])
+
+// Auto-focus search input when page loads
+onMounted(() => {
+  nextTick(() => {
+    searchInput.value?.focus()
+  })
+})
 
 // Fetch search data on mount
 const { data: searchData } = await useAsyncData('search-sections', () => 
