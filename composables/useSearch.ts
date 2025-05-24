@@ -23,9 +23,6 @@ interface UseSearchReturn {
   allSections: Ref<SearchSection[]>
   handleSearch: () => void
   clearSearch: () => void
-  getContentPreview: (content: string) => string
-  highlightText: (text: string, query: string) => string
-  formatDate: (dateString: string) => string
 }
 
 const calculateSearchScore = (section: SearchSection, query: string): number => {
@@ -62,47 +59,6 @@ const performSearchOperation = (
     .filter(section => section.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, maxResults)
-}
-
-const createContentPreview = (content: string): string => {
-  if (!content) return ''
-  const cleaned = content.replace(/[#*`]/g, '').trim()
-  return cleaned.length > 150 ? cleaned.substring(0, 150) + '...' : cleaned
-}
-
-const escapeHtml = (str: string): string => {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-}
-
-const createHighlightedText = (text: string, query: string): string => {
-  if (!text || !query) return text
-  
-  const escapedText = escapeHtml(text)
-  const escapedQuery = escapeHtml(query.trim())
-  
-  if (!escapedQuery) return escapedText
-  
-  const regex = new RegExp(`(${escapedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
-  
-  return escapedText.replace(regex, '<mark class="bg-yellow-400 text-gray-900 px-1 rounded">$1</mark>')
-}
-
-const formatDateString = (dateString: string): string => {
-  if (!dateString) return ''
-  try {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  } catch {
-    return dateString
-  }
 }
 
 const createDebouncedFunction = (fn: () => void, delay: number) => {
@@ -154,19 +110,12 @@ export const useSearch = async (options: UseSearchOptions = {}): Promise<UseSear
     isLoading.value = false
   }
 
-  const getContentPreview = createContentPreview
-  const highlightText = createHighlightedText
-  const formatDate = formatDateString
-
   return {
     searchQuery,
     searchResults,
     isLoading,
     allSections,
     handleSearch,
-    clearSearch,
-    getContentPreview,
-    highlightText,
-    formatDate
+    clearSearch
   }
 } 
