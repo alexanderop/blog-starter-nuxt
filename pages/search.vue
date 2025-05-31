@@ -2,7 +2,8 @@
 import { useTemplateRef } from 'vue'
 
 const searchInputRef = useTemplateRef<HTMLInputElement>('searchInputRef')
-const searchQuery = ref('')
+
+const { searchQuery, results } = await useKeywordSearch()
 
 onMounted(() => {
   searchInputRef.value?.focus()
@@ -56,6 +57,13 @@ onMounted(() => {
             </svg>
           </button>
         </div>
+      </div>
+
+      <div v-if="results.length" class="space-y-6">
+        <article v-for="r in results" :key="r.id" class="border-b border-gray-700 pb-6">
+          <h3 class="text-xl font-normal text-white mb-2">{{ r.title }}</h3>
+          <p class="text-gray-300" v-html="r.content" />
+        </article>
       </div>
 
       <div v-if="!searchQuery" class="text-center py-12">
