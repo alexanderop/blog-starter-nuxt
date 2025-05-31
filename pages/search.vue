@@ -3,7 +3,36 @@ import { useTemplateRef } from 'vue'
 
 const searchInputRef = useTemplateRef<HTMLInputElement>('searchInputRef')
 
-const { searchQuery, results } = await useKeywordSearch()
+const searchType = ref<'fuzzy' | 'keyword'>('fuzzy')
+
+const fuzzySearch = await useFuzzySearch()
+const keywordSearch = useKeywordSearch()
+
+const searchQuery = computed({
+  get: () => searchType.value === 'fuzzy' ? fuzzySearch.searchQuery.value : keywordSearch.searchQuery.value,
+  set: (value: string) => {
+    if (searchType.value === 'fuzzy') {
+      fuzzySearch.searchQuery.value = value
+    } else {
+      keywordSearch.searchQuery.value = value
+    }
+  }
+})
+
+const results = computed(() => {
+  return searchType.value === 'fuzzy' ? fuzzySearch.results.value : keywordSearch.results.value
+})
+
+watch(searchType, (newType) => {
+  const currentQuery = searchQuery.value
+  if (newType === 'fuzzy') {
+    fuzzySearch.searchQuery.value = currentQuery
+    keywordSearch.searchQuery.value = ''
+  } else {
+    keywordSearch.searchQuery.value = currentQuery
+    fuzzySearch.searchQuery.value = ''
+  }
+})
 
 onMounted(() => {
   searchInputRef.value?.focus()
@@ -18,7 +47,51 @@ onMounted(() => {
         <p class="text-xl text-gray-300">Find articles, tutorials, and insights</p>
       </div>
       
-      <div class="mb-8">
+      <div class="mb-6">
+        <div class="flex justify-center space-x-6 mb-6">
+          <label class="flex items-center cursor-pointer">
+            <input
+              v-model="searchType"
+              type="radio"
+              value="fuzzy"
+              class="sr-only"
+            >
+            <div class="relative">
+              <div
+:class="[
+                'w-4 h-4 rounded-full border-2 transition-all duration-200',
+                searchType === 'fuzzy' 
+                  ? 'border-blue-500 bg-blue-500' 
+                  : 'border-gray-400 bg-transparent'
+              ]">
+                <div v-if="searchType === 'fuzzy'" class="absolute inset-1 bg-white rounded-full"/>
+              </div>
+            </div>
+            <span class="ml-3 text-white">Fuzzy Search</span>
+          </label>
+          
+          <label class="flex items-center cursor-pointer">
+            <input
+              v-model="searchType"
+              type="radio"
+              value="keyword"
+              class="sr-only"
+            >
+            <div class="relative">
+              <div
+:class="[
+                'w-4 h-4 rounded-full border-2 transition-all duration-200',
+                searchType === 'keyword' 
+                  ? 'border-blue-500 bg-blue-500' 
+                  : 'border-gray-400 bg-transparent'
+              ]">
+                <div v-if="searchType === 'keyword'" class="absolute inset-1 bg-white rounded-full"/>
+              </div>
+            </div>
+            <span class="ml-3 text-white">Keyword Search</span>
+          </label>
+        </div>
+        
         <div class="relative group">
           <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-200">
             <svg 
@@ -41,7 +114,7 @@ onMounted(() => {
             ref="searchInputRef"
             v-model="searchQuery"
             type="text"
-            placeholder="Search articles..."
+            :placeholder="searchType === 'fuzzy' ? 'Fuzzy search articles...' : 'Keyword search articles...'"
             class="w-full pl-12 pr-12 py-3.5 text-white placeholder-gray-400 bg-gray-800/50 backdrop-blur-sm border border-gray-600/50 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-gray-800/80 hover:border-gray-500/50"
           >
 
@@ -73,11 +146,15 @@ onMounted(() => {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
           <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 text-center">
             <div class="text-3xl mb-3">💡</div>
-            <p class="text-gray-300">Search by title, content, or tags</p>
+            <p class="text-gray-300">
+              {{ searchType === 'fuzzy' ? 'Fuzzy search finds similar matches' : 'Search by exact keywords' }}
+            </p>
           </div>
           <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 text-center">
             <div class="text-3xl mb-3">🔍</div>
-            <p class="text-gray-300">Use specific keywords for better results</p>
+            <p class="text-gray-300">
+              {{ searchType === 'fuzzy' ? 'Handles typos and partial matches' : 'Use specific keywords for better results' }}
+            </p>
           </div>
           <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 text-center">
             <div class="text-3xl mb-3">⚡</div>
