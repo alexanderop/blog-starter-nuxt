@@ -1,6 +1,11 @@
 <script setup lang="ts">
+import type { SearchMode } from '~/types/search'
+import { useDummySearch } from '~/composables/useDummySearch'
+
 const searchQuery = ref('')
-const searchMode = ref<'keyword' | 'fuzzy' | 'semantic' | 'hybrid'>('keyword')
+const searchMode = ref<SearchMode>('keyword')
+
+const { isLoading, filteredResults } = useDummySearch(searchQuery)
 </script>
 
 <template>
@@ -21,7 +26,18 @@ const searchMode = ref<'keyword' | 'fuzzy' | 'semantic' | 'hybrid'>('keyword')
         />
       </div>
 
-      <div v-if="!searchQuery" class="text-center py-12">
+      <!-- Search Results -->
+      <div v-if="searchQuery">
+        <BaseSearchResult
+          :results="filteredResults"
+          :loading="isLoading"
+          :query="searchQuery"
+          :total-results="filteredResults.length"
+        />
+      </div>
+
+      <!-- Welcome State (when no search query) -->
+      <div v-else class="text-center py-12">
         <div class="text-gray-400 text-lg mb-4">
           Start typing to search through blog posts
         </div>
