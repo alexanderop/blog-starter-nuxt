@@ -1,20 +1,12 @@
-import { defineContentConfig, defineCollection, z } from '@nuxt/content'
+import { defineContentConfig, defineCollection } from '@nuxt/content'
+import { blogSchema } from './schema/blog'
 
 export default defineContentConfig({
   collections: {
     blog: defineCollection({
       type: 'page',
       source: 'blog/*.md',
-      schema: z.object({
-        tags: z.array(z.string()),
-        title: z.string(),
-        description: z.string(),
-        date: z.string(),
-        // Custom computed columns added by hooks
-        readingTime: z.number().optional(),
-        wordCount: z.number().optional(),
-        lastModified: z.date().optional(),
-      })
+      schema: blogSchema
     })
   }
 })
