@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { SearchMode } from '~/types/search'
 import { useKeywordSearch } from '~/composables/useKeywordSearch'
+import { useFuzzySearch } from '~/composables/useFuzzySearch'
 
 const searchQuery = ref('')
 const searchMode = ref<SearchMode>('keyword')
@@ -10,9 +11,17 @@ const {
   isLoading: keywordIsLoading 
 } = useKeywordSearch(searchQuery)
 
+const { 
+  results: fuzzyResults, 
+  isLoading: fuzzyIsLoading 
+} = useFuzzySearch(searchQuery)
+
 const currentResults = computed(() => {
   if (searchMode.value === 'keyword') {
     return keywordResults.value
+  }
+  if (searchMode.value === 'fuzzy') {
+    return fuzzyResults.value
   }
   return []
 })
@@ -20,6 +29,9 @@ const currentResults = computed(() => {
 const isLoading = computed(() => {
   if (searchMode.value === 'keyword') {
     return keywordIsLoading.value
+  }
+  if (searchMode.value === 'fuzzy') {
+    return fuzzyIsLoading.value
   }
   return false
 })
