@@ -1,24 +1,14 @@
 // server/transformers/embeddingGenerator.ts
 import { defineTransformer } from '@nuxt/content';
 import { pipeline } from '@xenova/transformers';
-import type { BlogPost } from '~/schema/blog';
+import type { BlogPost } from '../schema/blog'
+import { tryCatch } from '../shared/utils/try-catch'
 
 const modelName = 'Xenova/bge-small-en-v1.5'; // Updated to use the bge-small-en-v1.5 model
 
 // Types
-interface ContentNode {
-  type: string;
-  value?: string;
-  children?: ContentNode[];
-}
-
-interface ContentBody {
-  children?: ContentNode[];
-}
-
 interface BlogContent extends BlogPost {
   id: string;
-  body?: ContentBody;
   _path?: string;
   [key: string]: unknown;
 }
@@ -28,37 +18,11 @@ interface EmbeddingPipeline {
 }
 
 // Functional Core - Pure Functions
-const extractTextFromNodes = (nodes: ContentNode[]): string => {
-  let text = '';
-  for (const node of nodes) {
-    if (node.type === 'text' && node.value) {
-      text += node.value + ' ';
-    } else if (node.children && Array.isArray(node.children)) {
-      text += extractTextFromNodes(node.children);
-    }
-  }
-  return text;
-};
-
-const extractBodyText = (body: ContentBody): string => {
-  if (!body.children || !Array.isArray(body.children)) {
-    return '';
-  }
-  return extractTextFromNodes(body.children).replace(/\s+/g, ' ').trim();
-};
-
 const combineTextForEmbedding = (content: BlogContent): string => {
   let textToEmbed = content.title || '';
   
   if (content.description) {
     textToEmbed += (textToEmbed ? '. ' : '') + content.description;
-  }
-
-  if (content.body) {
-    const bodyText = extractBodyText(content.body);
-    if (bodyText) {
-      textToEmbed += (textToEmbed ? '. ' : '') + bodyText.substring(0, 1000);
-    }
   }
 
   return textToEmbed.trim();
@@ -134,13 +98,14 @@ export default defineTransformer({
       return setContentEmbedding(blogContent, null);
     }
 
-    try {
-      const embedding = await generateEmbedding(textToEmbed);
-      return setContentEmbedding(blogContent, embedding);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logError(`Error generating embedding for ${blogContent._path}:`, error);
+    const result = await tryCatch(generateEmbedding(textToEmbed));
+    
+    if (result.error) {
+      const errorMessage = result.error instanceof Error ? result.error.message : 'Unknown error';
+      logError(`Error generating embedding for ${blogContent._path}:`, result.error);
       return setContentEmbedding(blogContent, null, `Embedding generation failed: ${errorMessage}`);
     }
+    
+    return setContentEmbedding(blogContent, result.data);
   }
 });
