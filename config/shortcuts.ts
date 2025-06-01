@@ -129,6 +129,12 @@ export const SHORTCUTS: ShortcutCategory[] = [
         keyCombo: 'shift+ctrl+a',
         description: 'Open Portfolio',
         action: { type: 'external', target: 'https://alexop.dev/' }
+      },
+      {
+        keys: ['⇧', 'Ctrl', 'D'],
+        keyCombo: 'shift+ctrl+d',
+        description: 'SQLite Debugger (Dev)',
+        action: { type: 'navigate', target: '/debug-sqlite' }
       }
     ]
   }
