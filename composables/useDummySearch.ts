@@ -1,12 +1,4 @@
-import { ref, computed, watch } from 'vue'
-import type { BlogPost } from '~/schema/blog'
-
-interface SearchResult extends BlogPost {
-  id: string
-  content: string
-  slug: string
-  excerpt: string
-}
+import type { SearchResult } from '~/types/search'
 
 const mockResults: SearchResult[] = [
   {

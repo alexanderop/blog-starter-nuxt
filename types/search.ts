@@ -1,12 +1,10 @@
-export interface SearchResult {
+import type { BlogPost } from '~/schema/blog'
+
+export interface SearchResult extends BlogPost {
   id: string
-  title: string
-  description: string
-  content?: string
-  tags: string[]
-  date: string
+  content: string
   slug: string
-  excerpt?: string
+  excerpt: string
 }
 
 export type SearchMode = 'keyword' | 'fuzzy' | 'semantic' | 'hybrid'
