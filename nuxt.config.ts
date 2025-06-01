@@ -8,7 +8,9 @@ export default defineNuxtConfig({
   modules: ['@nuxt/content', '@nuxt/eslint', '@nuxtjs/tailwindcss', '@vueuse/nuxt'],
   imports: {
     dirs: [
-      'config/**'
+      'config/**',
+      'schema/**',
+      'types/**'
     ]
   },
   content: {
