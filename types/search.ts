@@ -6,6 +6,9 @@ export interface SearchResult extends BlogPost {
   slug: string
   excerpt: string
   similarity?: number
+  source?: 'fuzzy' | 'semantic' | 'both'
+  fuzzyScore?: number
+  semanticScore?: number
 }
 
 export type SearchMode = 'keyword' | 'fuzzy' | 'semantic' | 'hybrid'

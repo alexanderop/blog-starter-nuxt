@@ -56,6 +56,49 @@ const getExcerpt = (): string => {
 const navigateToPost = () => {
   navigateTo(`/blog/${result.slug}`)
 }
+
+const getSourceIcon = (source: string) => {
+  if (source === 'both') return 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z'
+  if (source === 'fuzzy') return 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z'
+  return 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'
+}
+
+const getSourceLabel = (source: string) => {
+  if (source === 'both') return 'Combined'
+  if (source === 'fuzzy') return 'Text Match'
+  return 'Meaning Match'
+}
+
+const getSourceColor = (source: string) => {
+  if (source === 'both') return 'text-purple-400 bg-purple-500/20 border-purple-400/30'
+  if (source === 'fuzzy') return 'text-blue-400 bg-blue-500/20 border-blue-400/30'
+  return 'text-green-400 bg-green-500/20 border-green-400/30'
+}
+
+const getTooltipContent = () => {
+  if (!result.source) return ''
+  
+  let content = `Found by: ${getSourceLabel(result.source)}`
+  
+  if (result.source === 'both' && result.fuzzyScore && result.semanticScore) {
+    content += `\nFuzzy Score: ${(result.fuzzyScore * 100).toFixed(0)}%`
+    content += `\nSemantic Score: ${(result.semanticScore * 100).toFixed(0)}%`
+    content += `\nFinal Score: ${(result.similarity! * 100).toFixed(0)}%`
+  } else if (result.similarity) {
+    content += `\nScore: ${(result.similarity * 100).toFixed(0)}%`
+  }
+  
+  return content
+}
+
+const calculateWeightedScore = () => {
+  if (result.source === 'both' && result.fuzzyScore && result.semanticScore) {
+    const fuzzyWeight = 0.4
+    const semanticWeight = 0.6
+    return (result.fuzzyScore * fuzzyWeight + result.semanticScore * semanticWeight) * 100
+  }
+  return result.similarity ? result.similarity * 100 : 0
+}
 </script>
 
 <template>
@@ -72,6 +115,50 @@ const navigateToPost = () => {
         <span :class="['text-xs font-medium', getSimilarityColor(result.similarity)]">
           {{ formatSimilarity(result.similarity) }}%
         </span>
+      </div>
+    </div>
+
+    <!-- Hybrid Search Indicator with Tooltip -->
+    <div 
+      v-if="searchMode === 'hybrid' && result.source" 
+      class="absolute top-4 right-4 group/tooltip"
+    >
+      <div :class="['w-3 h-3 rounded-full border-2 cursor-help transition-all duration-200 hover:scale-110', getSourceColor(result.source)]">
+        <svg class="w-full h-full p-0.5" fill="currentColor" viewBox="0 0 24 24">
+          <path :d="getSourceIcon(result.source)" />
+        </svg>
+      </div>
+      
+      <!-- Tooltip -->
+      <div class="absolute right-0 top-6 mt-1 invisible group-hover/tooltip:visible opacity-0 group-hover/tooltip:opacity-100 transition-all duration-200 z-50">
+        <div class="bg-gray-900/95 backdrop-blur-sm border border-gray-600/80 rounded-lg px-3 py-2 shadow-xl whitespace-nowrap">
+          <div class="text-xs font-medium text-gray-200">
+            <div class="text-white font-semibold mb-1">{{ getSourceLabel(result.source) }}</div>
+            <div v-if="result.source === 'both' && result.fuzzyScore && result.semanticScore" class="space-y-0.5">
+              <div class="flex justify-between space-x-3">
+                <span class="text-blue-300">Fuzzy:</span>
+                <span class="text-blue-100">{{ (result.fuzzyScore * 100).toFixed(0) }}%</span>
+              </div>
+              <div class="flex justify-between space-x-3">
+                <span class="text-green-300">Semantic:</span>
+                <span class="text-green-100">{{ (result.semanticScore * 100).toFixed(0) }}%</span>
+              </div>
+              <div class="border-t border-gray-600/50 pt-0.5 mt-1">
+                <div class="flex justify-between space-x-3">
+                  <span class="text-purple-300 font-medium">Final:</span>
+                  <span class="text-purple-100 font-medium">{{ calculateWeightedScore().toFixed(0) }}%</span>
+                </div>
+              </div>
+            </div>
+            <div v-else-if="result.similarity" class="flex justify-between space-x-3">
+              <span class="text-gray-300">Score:</span>
+              <span class="text-white">{{ (result.similarity * 100).toFixed(0) }}%</span>
+            </div>
+          </div>
+          
+          <!-- Tooltip Arrow -->
+          <div class="absolute -top-1 right-3 w-2 h-2 bg-gray-900/95 border-l border-t border-gray-600/80 transform rotate-45"></div>
+        </div>
       </div>
     </div>
 
@@ -128,7 +215,9 @@ const navigateToPost = () => {
     </div>
     
     <!-- Hover Arrow -->
-    <div class="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-200" :class="{ 'right-20': searchMode === 'semantic' && result.similarity !== undefined }">
+    <div class="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-200" :class="{ 
+      'right-10': (searchMode === 'semantic' || searchMode === 'hybrid') && (result.similarity !== undefined || result.source)
+    }">
       <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
       </svg>

@@ -7,6 +7,16 @@ interface EmbeddingPipeline {
   (text: string, options: { pooling: string; normalize: boolean }): Promise<{ data: Float32Array }>
 }
 
+interface BlogPost {
+  path?: string
+  title?: string
+  description?: string
+  tags?: string[]
+  date?: string
+  body?: string
+  embedding?: number[]
+}
+
 // Module-level state to maintain embedder instance
 let embedder: EmbeddingPipeline | null = null
 
@@ -27,7 +37,7 @@ const cosineSimilarity = (vecA: number[], vecB: number[]): number => {
   return dotProduct / (magnitudeA * magnitudeB);
 }
 
-const createSearchResult = (post: any, similarity: number): SearchResult => ({
+const createSearchResult = (post: BlogPost, similarity: number): SearchResult => ({
   id: post.path || String(Date.now() * Math.random()),
   title: post.title || 'Untitled',
   description: post.description || '',
