@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import type { SearchResult } from '~/types/search'
+import type { SearchResult, SearchMode } from '~/types/search'
 
 const { 
   result,
-  searchQuery = '' 
+  searchQuery = '',
+  searchMode = 'keyword'
 } = defineProps<{
   result: SearchResult
   searchQuery?: string
+  searchMode?: SearchMode
 }>()
 
 const highlightText = (text: string, query: string): string => {
@@ -31,6 +33,17 @@ const formatDate = (dateString: string): string => {
   })
 }
 
+const formatSimilarity = (similarity: number): string => {
+  return (similarity * 100).toFixed(1)
+}
+
+const getSimilarityColor = (similarity: number): string => {
+  if (similarity >= 0.8) return 'text-green-400'
+  if (similarity >= 0.6) return 'text-yellow-400'
+  if (similarity >= 0.4) return 'text-orange-400'
+  return 'text-red-400'
+}
+
 const truncateContent = (content: string, maxLength: number = 150): string => {
   if (content.length <= maxLength) return content
   return content.slice(0, maxLength).trim() + '...'
@@ -50,6 +63,18 @@ const navigateToPost = () => {
     class="group relative bg-gray-800/30 backdrop-blur-sm rounded-lg border border-gray-700/50 p-6 transition-all duration-200 hover:bg-gray-800/50 hover:border-gray-600/50 hover:shadow-lg hover:shadow-blue-500/5 cursor-pointer"
     @click="navigateToPost"
   >
+    <!-- Similarity Badge for Semantic Search -->
+    <div v-if="searchMode === 'semantic' && result.similarity !== undefined" class="absolute top-4 right-4">
+      <div class="flex items-center space-x-1 px-2.5 py-1 bg-gray-900/80 backdrop-blur-sm rounded-full border border-gray-600/50">
+        <svg class="w-3 h-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+        <span :class="['text-xs font-medium', getSimilarityColor(result.similarity)]">
+          {{ formatSimilarity(result.similarity) }}%
+        </span>
+      </div>
+    </div>
+
     <!-- Content -->
     <div class="space-y-4">
       <!-- Title -->
@@ -82,6 +107,16 @@ const navigateToPost = () => {
         </div>
         
         <div class="flex items-center space-x-3 text-xs text-gray-400">
+          <!-- Semantic similarity info -->
+          <div v-if="searchMode === 'semantic' && result.similarity !== undefined" class="flex items-center space-x-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span :class="getSimilarityColor(result.similarity)">
+              {{ formatSimilarity(result.similarity) }}% match
+            </span>
+          </div>
+          
           <time :datetime="result.date" class="flex items-center space-x-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -93,7 +128,7 @@ const navigateToPost = () => {
     </div>
     
     <!-- Hover Arrow -->
-    <div class="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+    <div class="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-200" :class="{ 'right-20': searchMode === 'semantic' && result.similarity !== undefined }">
       <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
       </svg>

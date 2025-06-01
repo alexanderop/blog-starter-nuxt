@@ -1,0 +1,1 @@
+export const EMBEDDING_MODEL_NAME = 'Xenova/bge-small-en-v1.5' 

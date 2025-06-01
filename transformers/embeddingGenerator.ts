@@ -3,8 +3,7 @@ import { defineTransformer } from '@nuxt/content';
 import { pipeline } from '@xenova/transformers';
 import type { BlogPost } from '../schema/blog'
 import { tryCatch } from '../shared/utils/try-catch'
-
-const modelName = 'Xenova/bge-small-en-v1.5'; // Updated to use the bge-small-en-v1.5 model
+import { EMBEDDING_MODEL_NAME } from '../shared/constants/models'
 
 // Types
 interface BlogContent extends BlogPost {
@@ -49,8 +48,8 @@ const logError = (message: string, error?: unknown): void => {
 };
 
 const loadModel = async (): Promise<EmbeddingPipeline> => {
-  logInfo(`Loading model: ${modelName}...`);
-  const pipelineInstance = await pipeline('feature-extraction', modelName);
+  logInfo(`Loading model: ${EMBEDDING_MODEL_NAME}...`);
+  const pipelineInstance = await pipeline('feature-extraction', EMBEDDING_MODEL_NAME);
   logInfo('Model loaded successfully.');
   return pipelineInstance as EmbeddingPipeline;
 };

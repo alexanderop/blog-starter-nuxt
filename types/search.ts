@@ -5,6 +5,7 @@ export interface SearchResult extends BlogPost {
   content: string
   slug: string
   excerpt: string
+  similarity?: number
 }
 
 export type SearchMode = 'keyword' | 'fuzzy' | 'semantic' | 'hybrid'
