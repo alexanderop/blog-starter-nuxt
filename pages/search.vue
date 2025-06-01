@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const searchQuery = ref('')
+const searchMode = ref<'keyword' | 'fuzzy' | 'semantic' | 'hybrid'>('keyword')
 </script>
 
 <template>
@@ -9,6 +10,8 @@ const searchQuery = ref('')
         <h1 class="text-4xl font-bold text-white mb-4">Search Blog</h1>
         <p class="text-xl text-gray-300">Find articles, tutorials, and insights</p>
       </div>
+      
+      <BaseSearchSelection v-model="searchMode" />
       
       <div class="mb-8">
         <BaseInputSearch
