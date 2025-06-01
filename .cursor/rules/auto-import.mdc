@@ -30,6 +30,6 @@ alwaysApply: false
 - Server utilities in server/ directory are automatically available
 
 ## Exception Cases
-- Third-party package functions need explicit imports unless configured in nuxt.config.ts
-- If auto-import is disabled in nuxt.config.ts, then explicit imports are required
+- Third-party package functions need explicit imports unless configured in [nuxt.config.ts](mdc:nuxt.config.ts)
+- If auto-import is disabled in [nuxt.config.ts](mdc:nuxt.config.ts), then explicit imports are required
 - Use explicit imports from #imports only when auto-import behavior needs to be overridden

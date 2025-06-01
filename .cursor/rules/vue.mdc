@@ -27,6 +27,23 @@ const {
 }>()
 ```
 
+## VueUse First Approach
+- **ALWAYS** search the web first to check if VueUse has a composable that can solve the problem
+- VueUse provides battle-tested, optimized utilities for common Vue patterns
+- Before implementing custom solutions, research existing VueUse composables
+- Search terms should include "vueuse" + the functionality you need (e.g., "vueuse mouse tracking", "vueuse local storage", "vueuse intersection observer")
+- Check the official VueUse documentation and examples before writing custom code
+- Even if VueUse doesn't have exactly what you need, it might have something similar that can be extended or adapted
+- VueUse composables are SSR-safe, well-tested, and follow Vue best practices
+
+### Common VueUse Categories to Check:
+- **State Management**: `useLocalStorage`, `useSessionStorage`, `useUrlSearchParams`
+- **Browser APIs**: `useClipboard`, `usePermission`, `useShare`, `useFullscreen`
+- **Sensors**: `useMouse`, `useKeyboard`, `useWindowSize`, `useIntersectionObserver`
+- **Network**: `useFetch`, `useWebSocket`, `useEventSource`
+- **Utilities**: `useDebounce`, `useThrottle`, `useToggle`, `useCounter`
+- **Animation**: `useTransition`, `useSpring`, `useAnimate`
+
 ## Core Vue 3.5 Principles
 - Always use Vue 3.5+ syntax and features when available
 - Prefer new APIs over legacy approaches
@@ -90,6 +107,106 @@ const inputRef = ref<HTMLInputElement>()
   <input ref="inputRef">
 </template>
 ```
+
+## Component v-model with defineModel() (Vue 3.4+)
+- **ALWAYS** use `defineModel()` macro for v-model components instead of manual props/emit pattern
+- `defineModel()` provides a cleaner, more maintainable approach to two-way binding
+- The returned ref automatically syncs with parent values and emits updates
+
+### ✅ Preferred (Vue 3.4+):
+```vue
+<script setup>
+const model = defineModel()
+
+// With options
+const modelWithDefault = defineModel({ default: 0 })
+const requiredModel = defineModel({ required: true })
+</script>
+
+<template>
+  <input v-model="model" />
+</template>
+```
+
+### ❌ Avoid (Legacy):
+```vue
+<script setup>
+const props = defineProps(['modelValue'])
+const emit = defineEmits(['update:modelValue'])
+</script>
+
+<template>
+  <input
+    :value="props.modelValue"
+    @input="emit('update:modelValue', $event.target.value)"
+  />
+</template>
+```
+
+### Named v-model Arguments:
+```vue
+<script setup>
+// Single named model
+const title = defineModel('title')
+
+// Multiple models
+const firstName = defineModel('firstName')
+const lastName = defineModel('lastName')
+
+// With options
+const titleWithOptions = defineModel('title', { required: true })
+</script>
+
+<template>
+  <!-- Usage: <MyComponent v-model:title="bookTitle" /> -->
+  <input type="text" v-model="title" />
+  
+  <!-- Usage: <MyComponent v-model:first-name="first" v-model:last-name="last" /> -->
+  <input type="text" v-model="firstName" />
+  <input type="text" v-model="lastName" />
+</template>
+```
+
+### v-model Modifiers:
+```vue
+<script setup>
+// Basic modifier handling
+const [model, modifiers] = defineModel()
+
+// With custom logic
+const [model, modifiers] = defineModel({
+  set(value) {
+    if (modifiers.capitalize) {
+      return value.charAt(0).toUpperCase() + value.slice(1)
+    }
+    if (modifiers.uppercase) {
+      return value.toUpperCase()
+    }
+    return value
+  }
+})
+
+// Named models with modifiers
+const [firstName, firstNameModifiers] = defineModel('firstName')
+const [lastName, lastNameModifiers] = defineModel('lastName')
+</script>
+
+<template>
+  <!-- Usage: <MyComponent v-model.capitalize="text" /> -->
+  <input type="text" v-model="model" />
+  
+  <!-- Usage: <MyComponent v-model:first-name.capitalize="first" v-model:last-name.uppercase="last" /> -->
+  <input type="text" v-model="firstName" />
+  <input type="text" v-model="lastName" />
+</template>
+```
+
+### Important Notes:
+- `defineModel()` automatically creates the `modelValue` prop and `update:modelValue` event
+- The returned ref can be used directly with native inputs via `v-model`
+- Modifiers are accessible via destructuring: `const [model, modifiers] = defineModel()`
+- For named models, use string argument: `defineModel('title')`
+- Options (default, required, etc.) are passed as second argument
 
 ## Unique ID Generation (Vue 3.5+)
 - **ALWAYS** use `useId()` for generating unique IDs in SSR applications
