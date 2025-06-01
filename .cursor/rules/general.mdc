@@ -6,3 +6,4 @@ alwaysApply: true
 - never add comments try to make everything redable with variable names or code only
 
 - prefer functional core imperative shell pattern
+- try to never use any in typescript

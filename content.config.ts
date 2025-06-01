@@ -9,13 +9,11 @@ export default defineContentConfig({
         tags: z.array(z.string()),
         title: z.string(),
         description: z.string(),
-        date: z.date(),
+        date: z.string(),
         // Custom computed columns added by hooks
         readingTime: z.number().optional(),
         wordCount: z.number().optional(),
-        excerpt: z.string().optional(),
         lastModified: z.date().optional(),
-        contentType: z.enum(['tutorial', 'guide', 'article']).optional(),
       })
     })
   }

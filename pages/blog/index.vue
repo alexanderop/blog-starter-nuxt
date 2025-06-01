@@ -37,6 +37,9 @@ const { data: posts } = await useAsyncData('blog', () => queryCollection('blog')
                 day: 'numeric' 
               }) }}
             </time>
+            <span v-if="post.readingTime" class="text-gray-400">
+              {{ post.readingTime }} min read
+            </span>
             <div v-if="post.tags && post.tags.length" class="flex gap-2">
               <span 
                 v-for="tag in post.tags.slice(0, 3)" 
