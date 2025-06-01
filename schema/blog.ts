@@ -9,6 +9,8 @@ export const blogSchema = z.object({
   readingTime: z.number().optional(),
   wordCount: z.number().optional(),
   lastModified: z.date().optional(),
+  embedding: z.array(z.number()).nullable().optional(), // Add this line
+  embeddingError: z.string().optional() // Optional: to log errors
 })
 
 export type BlogPost = z.infer<typeof blogSchema>

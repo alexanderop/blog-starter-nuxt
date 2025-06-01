@@ -15,6 +15,7 @@ export default defineNuxtConfig({
   },
   content: {
     build: {
+      transformers: ['~/transformers/embeddingGenerator'],
       markdown: {
         highlight: {
           theme: 'dracula'
