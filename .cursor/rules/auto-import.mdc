@@ -1,0 +1,35 @@
+---
+description: 
+globs: *.vue,*.ts
+alwaysApply: false
+---
+# Nuxt Auto-Imports Rules
+
+## Vue and Nuxt Composables - Auto-imported (no import needed)
+- ref, reactive, computed, watch, watchEffect, onMounted, onUnmounted, nextTick
+- useFetch, useLazyFetch, useAsyncData, useLazyAsyncData
+- useRoute, useRouter, navigateTo, useNuxtApp
+- useRuntimeConfig, useAppConfig, useCookie, useRequestHeaders
+- useState, useLazyAsyncData, useError, throwError, clearError
+- useHead, useSeoMeta, useServerSeoMeta
+- useNuxtData, refreshCookie, clearNuxtData
+- definePageMeta, defineNuxtRouteMiddleware, defineNuxtPlugin
+- callOnce, useRequestURL, useRequestEvent
+
+## Directory-based Auto-imports
+- All functions from composables/ directory are auto-imported
+- All components from components/ directory are auto-imported  
+- All utilities from utils/ directory are auto-imported
+- All functions from server/utils/ are auto-imported in server context
+## Key Rules
+- Never suggest importing Vue APIs like ref, computed, watch - they are auto-imported
+- Never suggest importing Nuxt composables like useFetch, useRoute - they are auto-imported
+- Never suggest importing from composables/, utils/, or components/ - they are auto-imported
+- If explicit import is needed, use #imports alias: `import { ref } from '#imports'`
+- Components in templates don't need imports - they are auto-discovered
+- Server utilities in server/ directory are automatically available
+
+## Exception Cases
+- Third-party package functions need explicit imports unless configured in nuxt.config.ts
+- If auto-import is disabled in nuxt.config.ts, then explicit imports are required
+- Use explicit imports from #imports only when auto-import behavior needs to be overridden
