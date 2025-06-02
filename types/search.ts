@@ -1,6 +1,6 @@
-import type { BlogPost } from '~/schema/blog'
+import type { BlogCollectionItem } from '@nuxt/content'
 
-export interface SearchResult extends BlogPost {
+export interface SearchResult extends BlogCollectionItem {
   id: string
   content: string
   slug: string
