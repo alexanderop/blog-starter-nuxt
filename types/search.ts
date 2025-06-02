@@ -7,6 +7,17 @@ export interface SearchResult extends BlogCollectionItem {
   excerpt: string
 }
 
+export type DisplaySearchResult = Pick<SearchResult, 
+  | 'id' 
+  | 'title' 
+  | 'description' 
+  | 'tags' 
+  | 'date' 
+  | 'slug'
+  | 'excerpt'
+  | 'content'
+>
+
 export type SearchMode = 'keyword' | 'fuzzy' | 'semantic' | 'hybrid'
 
 export interface SearchOptions {
