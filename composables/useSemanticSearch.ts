@@ -2,15 +2,14 @@ import type { SearchResult } from '~/types/search'
 import { EMBEDDING_MODEL_NAME } from '~/shared/constants/models'
 import { tryCatch } from '~/shared/utils/try-catch'
 import { useSupported } from '@vueuse/core'
+import type { BlogCollectionItem } from '@nuxt/content'
 
 interface EmbeddingPipeline {
   (text: string, options: { pooling: string; normalize: boolean }): Promise<{ data: Float32Array }>
 }
 
-// Module-level state to maintain embedder instance
 let embedder: EmbeddingPipeline | null = null
 
-// Functional Core - Pure Functions
 const cosineSimilarity = (vecA: number[], vecB: number[]): number => {
   if (vecA.length !== vecB.length) {
     throw new Error(`Vector dimensions don't match: ${vecA.length} vs ${vecB.length}`);
@@ -27,7 +26,7 @@ const cosineSimilarity = (vecA: number[], vecB: number[]): number => {
   return dotProduct / (magnitudeA * magnitudeB);
 }
 
-const createSearchResult = (post: any, similarity: number): SearchResult => ({
+const createSearchResult = (post: Pick<BlogCollectionItem, "title" | "tags" | "description" | "date" | "embedding" | "path" | "body">, similarity: number): SearchResult => ({
   id: post.path || String(Date.now() * Math.random()),
   title: post.title || 'Untitled',
   description: post.description || '',
@@ -36,10 +35,17 @@ const createSearchResult = (post: any, similarity: number): SearchResult => ({
   slug: post.path?.split('/').pop() || '',
   excerpt: post.description?.slice(0, 150) + '...' || '',
   content: post.description || '',
+  path: post.path || '',
+  seo: {},
+  body: post.body || {},
+  stem: post.path?.split('/').pop()?.replace(/\.[^/.]+$/, '') || '',
+  readingTime: 0,
+  wordCount: 0,
+  extension: 'md',
+  meta: {},
   similarity
 })
 
-// Imperative Shell - Side Effects
 const getOrLoadModel = async (): Promise<EmbeddingPipeline> => {
   if (!embedder) {
     const { pipeline } = await import('@xenova/transformers')
@@ -55,38 +61,27 @@ const generateQueryEmbedding = async (query: string): Promise<number[]> => {
 }
 
 export const useSemanticSearch = (searchQuery: Ref<string>) => {
-  // Client-side support detection using VueUse
   const isSupported = useSupported(() => 
     import.meta.client && typeof window !== 'undefined'
   )
 
   const debouncedSearchQuery = refDebounced(searchQuery, 300)
   
-  // Results and loading state
   const results = ref<SearchResult[]>([])
   const isLoading = ref(false)
 
-  // Fetch all posts for semantic search
   const { data: allPosts } = useAsyncData('all-posts-for-semantic-search', () => 
     queryCollection('blog')
       .select('title', 'description', 'path', 'date', 'tags', 'body', 'embedding')
       .all()
   )
 
-  // Client-side semantic search execution
   const performSemanticSearch = async (query: string) => {
     if (!query.trim() || !allPosts.value || !isSupported.value) {
       return []
     }
 
-    const result = await tryCatch(generateQueryEmbedding(query))
-    
-    if (result.error) {
-      console.error('Semantic search error:', result.error)
-      return []
-    }
-    
-    const queryEmbedding = result.data
+    const queryEmbedding = await generateQueryEmbedding(query)
     
     const postsWithSimilarity = allPosts.value
       .filter(post => post.embedding && post.embedding.length > 0)
@@ -102,7 +97,6 @@ export const useSemanticSearch = (searchQuery: Ref<string>) => {
     )
   }
 
-  // Watch for search query changes and execute search on client-side only
   watch(
     [debouncedSearchQuery, allPosts, isSupported],
     async ([query, posts, supported]) => {
@@ -118,14 +112,16 @@ export const useSemanticSearch = (searchQuery: Ref<string>) => {
 
       isLoading.value = true
       
-      try {
-        results.value = await performSemanticSearch(query)
-      } catch (error) {
-        console.error('Semantic search failed:', error)
+      const result = await tryCatch(performSemanticSearch(query))
+      
+      if (result.error) {
+        console.error('Semantic search failed:', result.error)
         results.value = []
-      } finally {
-        isLoading.value = false
+      } else {
+        results.value = result.data
       }
+      
+      isLoading.value = false
     },
     { immediate: true }
   )
