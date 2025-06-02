@@ -1,5 +1,3 @@
-import type { SearchResult } from '~/types/search'
-
 const mockResults: SearchResult[] = [
   {
     id: '1',

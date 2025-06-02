@@ -10,13 +10,12 @@ export const useKeywordSearch = (searchQuery: Ref<string>) => {
         }
   
         const posts = await queryCollection('blog')
-          .select('title', 'description', 'path', 'date', 'tags', 'body')
+          .select('title', 'description', 'path', 'date', 'tags')
           .orWhere(builder => 
             builder
               .where('title', 'LIKE', `%${query}%`)
               .where('description', 'LIKE', `%${query}%`)
               .where('tags', 'LIKE', `%${query}%`)
-              .where('body', '=', query)
           )
           .limit(20)
           .all()
