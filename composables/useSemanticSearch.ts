@@ -1,30 +1,11 @@
-import type { SearchResult } from '~/types/search'
-import { EMBEDDING_MODEL_NAME } from '~/shared/constants/models'
-import { tryCatch } from '~/shared/utils/try-catch'
-import { useSupported } from '@vueuse/core'
 import type { BlogCollectionItem } from '@nuxt/content'
+import { EMBEDDING_MODEL_NAME } from '~/shared/constants/models'
 
 interface EmbeddingPipeline {
   (text: string, options: { pooling: string; normalize: boolean }): Promise<{ data: Float32Array }>
 }
 
 let embedder: EmbeddingPipeline | null = null
-
-const cosineSimilarity = (vecA: number[], vecB: number[]): number => {
-  if (vecA.length !== vecB.length) {
-    throw new Error(`Vector dimensions don't match: ${vecA.length} vs ${vecB.length}`);
-  }
-  
-  const dotProduct = vecA.reduce((sum, a, i) => sum + a * (vecB[i] ?? 0), 0);
-  const magnitudeA = Math.hypot(...vecA);
-  const magnitudeB = Math.hypot(...vecB);
-  
-  if (magnitudeA === 0 || magnitudeB === 0) {
-    return 0;
-  }
-   
-  return dotProduct / (magnitudeA * magnitudeB);
-}
 
 const createSearchResult = (post: Pick<BlogCollectionItem, "title" | "tags" | "description" | "date" | "embedding" | "path" | "body">, similarity: number): SearchResult => ({
   id: post.path || String(Date.now() * Math.random()),
@@ -117,10 +98,11 @@ export const useSemanticSearch = (searchQuery: Ref<string>) => {
       if (result.error) {
         console.error('Semantic search failed:', result.error)
         results.value = []
-      } else {
-        results.value = result.data
+        isLoading.value = false
+        return
       }
       
+      results.value = result.data
       isLoading.value = false
     },
     { immediate: true }
