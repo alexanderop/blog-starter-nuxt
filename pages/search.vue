@@ -6,6 +6,62 @@ const searchQuery = ref('')
 const searchMode = ref<SearchMode>('keyword')
 
 const { isLoading, filteredResults } = useDummySearch(searchQuery)
+
+// we need to implement something like this
+// const { 
+//   results: keywordResults, 
+//   isLoading: keywordIsLoading 
+// } = useKeywordSearch(searchQuery)
+
+// const { 
+//   results: fuzzyResults, 
+//   isLoading: fuzzyIsLoading 
+// } = useFuzzySearch(searchQuery)
+
+// const { 
+//   results: semanticResults, 
+//   isLoading: semanticIsLoading,
+//   isSupported: semanticIsSupported 
+// } = useSemanticSearch(searchQuery)
+
+// const { 
+//   results: hybridResults, 
+//   isLoading: hybridIsLoading,
+//   isSupported: hybridIsSupported,
+//   searchInfo: hybridSearchInfo
+// } = useHybridSearch(searchQuery)
+
+// const currentResults = computed(() => {
+//   if (searchMode.value === 'keyword') {
+//     return keywordResults.value
+//   }
+//   if (searchMode.value === 'fuzzy') {
+//     return fuzzyResults.value
+//   }
+//   if (searchMode.value === 'semantic') {
+//     return semanticResults.value
+//   }
+//   if (searchMode.value === 'hybrid') {
+//     return hybridResults.value
+//   }
+//   return []
+// })
+
+// const isLoading = computed(() => {
+//   if (searchMode.value === 'keyword') {
+//     return keywordIsLoading.value
+//   }
+//   if (searchMode.value === 'fuzzy') {
+//     return fuzzyIsLoading.value
+//   }
+//   if (searchMode.value === 'semantic') {
+//     return semanticIsLoading.value
+//   }
+//   if (searchMode.value === 'hybrid') {
+//     return hybridIsLoading.value
+//   }
+//   return false
+// })
 </script>
 
 <template>
