@@ -9,7 +9,14 @@ const mockResults: SearchResult[] = [
     tags: ['nuxt', 'vue', 'tutorial'],
     date: '2024-03-22',
     slug: 'getting-started-nuxt',
-    excerpt: 'Learn how to build modern web applications with Nuxt 3 and discover its powerful features.'
+    excerpt: 'Learn how to build modern web applications with Nuxt 3 and discover its powerful features.',
+    path: '/blog/getting-started-nuxt',
+    seo: {},
+    body: { type: 'minimal', value: [], toc: { title: '', depth: 2, searchDepth: 2, links: [] } },
+    stem: '/blog/getting-started-nuxt',
+    extension: '.md',
+    meta: {},
+    navigation: true
   },
   {
     id: '2',
@@ -19,7 +26,14 @@ const mockResults: SearchResult[] = [
     tags: ['composables', 'search', 'typescript', 'vue'],
     date: '2024-03-20',
     slug: 'understanding-usesearch-composable',
-    excerpt: 'Master the art of building sophisticated search features in Vue applications.'
+    excerpt: 'Master the art of building sophisticated search features in Vue applications.',
+    path: '/blog/understanding-usesearch-composable',
+    seo: {},
+    body: { type: 'minimal', value: [], toc: { title: '', depth: 2, searchDepth: 2, links: [] } },
+    stem: '/blog/understanding-usesearch-composable',
+    extension: '.md',
+    meta: {},
+    navigation: true
   },
   {
     id: '3',
@@ -29,7 +43,14 @@ const mockResults: SearchResult[] = [
     tags: ['cats', 'animals', 'lifestyle'],
     date: '2024-03-18',
     slug: 'fascinating-world-of-cats',
-    excerpt: 'Discover the secrets behind cat behavior and why they make such amazing companions.'
+    excerpt: 'Discover the secrets behind cat behavior and why they make such amazing companions.',
+    path: '/blog/fascinating-world-of-cats',
+    seo: {},
+    body: { type: 'minimal', value: [], toc: { title: '', depth: 2, searchDepth: 2, links: [] } },
+    stem: '/blog/fascinating-world-of-cats',
+    extension: '.md',
+    meta: {},
+    navigation: true
   }
 ]
 
