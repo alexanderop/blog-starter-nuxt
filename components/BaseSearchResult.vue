@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import type { SearchResult } from '~/types/search'
-
 const { 
   results = [], 
   loading = false,
   query = '',
   totalResults = 0 
 } = defineProps<{
-  results?: SearchResult[]
+  results?: DisplaySearchResult[]
   loading?: boolean
   query?: string
   totalResults?: number
@@ -40,12 +38,12 @@ const {
     <div v-if="loading" class="space-y-4">
       <div v-for="i in 3" :key="i" class="animate-pulse">
         <div class="bg-gray-800/50 rounded-lg p-6 border border-gray-700/50">
-          <div class="h-6 bg-gray-700 rounded w-3/4 mb-3"></div>
-          <div class="h-4 bg-gray-700 rounded w-full mb-2"></div>
-          <div class="h-4 bg-gray-700 rounded w-2/3 mb-4"></div>
+          <div class="h-6 bg-gray-700 rounded w-3/4 mb-3"/>
+          <div class="h-4 bg-gray-700 rounded w-full mb-2"/>
+          <div class="h-4 bg-gray-700 rounded w-2/3 mb-4"/>
           <div class="flex space-x-2">
-            <div class="h-6 bg-gray-700 rounded w-16"></div>
-            <div class="h-6 bg-gray-700 rounded w-20"></div>
+            <div class="h-6 bg-gray-700 rounded w-16"/>
+            <div class="h-6 bg-gray-700 rounded w-20"/>
           </div>
         </div>
       </div>
