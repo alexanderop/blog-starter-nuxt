@@ -1,23 +1,14 @@
-// server/transformers/embeddingGenerator.ts
 import { defineTransformer } from '@nuxt/content';
 import { pipeline } from '@xenova/transformers';
-import type { BlogPost } from '../schema/blog'
 import { tryCatch } from '../shared/utils/try-catch'
 import { EMBEDDING_MODEL_NAME } from '../shared/constants/models'
-
-// Types
-interface BlogContent extends BlogPost {
-  id: string;
-  _path?: string;
-  [key: string]: unknown;
-}
+import type { BlogCollectionItem } from '@nuxt/content';
 
 interface EmbeddingPipeline {
   (text: string, options: { pooling: string; normalize: boolean }): Promise<{ data: Float32Array }>;
 }
 
-// Functional Core - Pure Functions
-const combineTextForEmbedding = (content: BlogContent): string => {
+const combineTextForEmbedding = (content: BlogCollectionItem): string => {
   let textToEmbed = content.title || '';
   
   if (content.description) {
@@ -27,8 +18,7 @@ const combineTextForEmbedding = (content: BlogContent): string => {
   return textToEmbed.trim();
 };
 
-const shouldSkipContent = (content: BlogContent): boolean => {
-  // Skip content without required fields
+const shouldSkipContent = (content: BlogCollectionItem): boolean => {
   return !content.title || !content.description;
 };
 
@@ -36,7 +26,6 @@ const createEmbeddingFromOutput = (output: { data: Float32Array }): number[] => 
   return Array.from(output.data);
 };
 
-// Imperative Shell - Side Effects
 let embedder: EmbeddingPipeline | null = null;
 
 const logInfo = (message: string): void => {
@@ -68,7 +57,7 @@ const generateEmbedding = async (text: string): Promise<number[]> => {
 };
 
 const setContentEmbedding = (
-  content: BlogContent, 
+  content: BlogCollectionItem, 
   embedding: number[] | null, 
   error?: string
 ) => {
@@ -79,14 +68,13 @@ const setContentEmbedding = (
   };
 };
 
-// Main Transformer
 logInfo('Initializing...');
 
 export default defineTransformer({
   name: 'embeddingGenerator',
   extensions: ['.md'],
   async transform(content, _options) {
-    const blogContent = content as BlogContent;
+    const blogContent = content as unknown as BlogCollectionItem;
     
     if (shouldSkipContent(blogContent)) {
       return setContentEmbedding(blogContent, null);
@@ -101,7 +89,7 @@ export default defineTransformer({
     
     if (result.error) {
       const errorMessage = result.error instanceof Error ? result.error.message : 'Unknown error';
-      logError(`Error generating embedding for ${blogContent._path}:`, result.error);
+      logError(`Error generating embedding for ${blogContent.path}:`, result.error);
       return setContentEmbedding(blogContent, null, `Embedding generation failed: ${errorMessage}`);
     }
     
