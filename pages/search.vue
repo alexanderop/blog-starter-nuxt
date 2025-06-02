@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import type { SearchMode } from '~/types/search'
-import { useKeywordSearch } from '~/composables/useKeywordSearch'
-import { useFuzzySearch } from '~/composables/useFuzzySearch'
-
 const searchQuery = ref('')
 const searchMode = ref<SearchMode>('keyword')
 
