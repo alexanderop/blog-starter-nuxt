@@ -10,11 +10,12 @@ export const useKeywordSearch = (searchQuery: Ref<string>) => {
         }
   
         const posts = await queryCollection('blog')
-          .select('title', 'description', 'path', 'date', 'tags')
+          .select('title', 'description', 'path', 'date', 'tags', 'rawbody')
           .orWhere(builder => 
             builder
               .where('title', 'LIKE', `%${query}%`)
               .where('description', 'LIKE', `%${query}%`)
+              .where('rawbody', 'LIKE', `%${query}%`)
               .where('tags', 'LIKE', `%${query}%`)
           )
           .limit(20)
@@ -27,8 +28,8 @@ export const useKeywordSearch = (searchQuery: Ref<string>) => {
           tags: post.tags || [],
           date: post.date || new Date().toISOString(),
           slug: post.path?.split('/').pop() || '',
-          excerpt: post.description?.slice(0, 150) + '...' || '',
-          content: post.description || '',
+          excerpt: post.rawbody?.slice(0, 150) + '...' || '',
+          content: post.rawbody || post.description || '',
         })) as SearchResult[]
       },
       {

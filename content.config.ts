@@ -14,6 +14,7 @@ export default defineContentConfig({
         readingTime: z.number().optional(),
         wordCount: z.number().optional(),
         lastModified: z.date().optional(),
+        rawbody: z.string()
       }) 
     })
   }
