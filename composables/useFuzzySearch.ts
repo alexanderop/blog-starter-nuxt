@@ -4,7 +4,7 @@ import type { SearchResult } from '~/types/search'
 export const useFuzzySearch = (searchQuery: Ref<string>) => {
   const { data: allPosts } = useAsyncData('all-posts-for-fuzzy-search', () => 
     queryCollection('blog')
-      .select('title', 'description', 'path', 'date', 'tags', 'body', 'readingTime', 'wordCount', 'lastModified', 'embedding', 'embeddingError')
+      .select('title', 'description', 'path', 'date', 'tags', 'body', 'readingTime', 'wordCount', 'lastModified')
       .all()
   )
 
