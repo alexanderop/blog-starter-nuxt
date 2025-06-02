@@ -1,5 +1,3 @@
-import type { SearchResult } from '~/types/search'
-
 export const useKeywordSearch = (searchQuery: Ref<string>) => {
     const { data: results, pending } = useAsyncData(
       () => `keyword-search-${searchQuery.value}`,
@@ -22,14 +20,14 @@ export const useKeywordSearch = (searchQuery: Ref<string>) => {
   
         return posts.map(post => ({
           id: post.path || String(Date.now() * Math.random()),
-          title: post.title || 'Untitled',
-          description: post.description || '',
-          tags: post.tags || [],
-          date: post.date || new Date().toISOString(),
-          slug: post.path?.split('/').pop() || '',
-          excerpt: post.description?.slice(0, 150) + '...' || '',
-          content: post.description || '',
-        })) as SearchResult[]
+          title: post.title,
+          description: post.description,
+          tags: post.tags,
+          date: post.date,
+          slug: post.path.split('/').pop(),
+          excerpt: post.description.slice(0, 150) + '...',
+          content: post.description,
+        }))
       },
       {
         watch: [searchQuery]
