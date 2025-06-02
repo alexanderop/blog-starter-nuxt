@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import type { SearchMode } from '~/types/search'
-import { useDummySearch } from '~/composables/useDummySearch'
-
 const searchQuery = ref('')
 const searchMode = ref<SearchMode>('keyword')
 
