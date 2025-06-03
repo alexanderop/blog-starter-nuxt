@@ -8,7 +8,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "clean:content": "rm -f .data/content/contents.sqlite"
+    "clean:content": "rm -f .data/content/contents.sqlite",
+    "typecheck": "nuxt typecheck"
   },
   "dependencies": {
     "@nuxt/content": "^3.5.1",
