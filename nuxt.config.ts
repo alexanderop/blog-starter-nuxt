@@ -5,7 +5,13 @@ export default defineNuxtConfig({
   future: {
     compatibilityVersion: 4
   },
-  modules: ['@nuxt/content', '@nuxt/eslint', '@nuxtjs/tailwindcss', '@vueuse/nuxt'],
+  modules: [
+    '@nuxt/content',
+    '@nuxt/eslint',
+    '@nuxtjs/tailwindcss',
+    '@vueuse/nuxt',
+    'nuxt-workers'
+  ],
   imports: {
     dirs: [
       'config/**',
