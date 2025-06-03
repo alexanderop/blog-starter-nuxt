@@ -1,12 +1,9 @@
 import { defineTransformer } from '@nuxt/content';
 import { pipeline } from '@xenova/transformers';
+import type { FeatureExtractionPipeline, Tensor } from '@xenova/transformers';
 import { tryCatch } from '../shared/utils/try-catch'
 import { EMBEDDING_MODEL_NAME } from '../shared/constants/models'
 import type { BlogCollectionItem } from '@nuxt/content';
-
-interface EmbeddingPipeline {
-  (text: string, options: { pooling: string; normalize: boolean }): Promise<{ data: Float32Array }>;
-}
 
 const combineTextForEmbedding = (content: BlogCollectionItem): string => {
   let textToEmbed = content.title || '';
@@ -22,28 +19,20 @@ const shouldSkipContent = (content: BlogCollectionItem): boolean => {
   return !content.title || !content.description;
 };
 
-const createEmbeddingFromOutput = (output: { data: Float32Array }): number[] => {
-  return Array.from(output.data);
+const createEmbeddingFromOutput = (output: Tensor): number[] => {
+  return Array.from(output.data as Float32Array);
 };
 
-let embedder: EmbeddingPipeline | null = null;
+let embedder: FeatureExtractionPipeline | null = null;
 
-const logInfo = (message: string): void => {
-  console.log(`[Embedding Transformer] ${message}`);
-};
-
-const logError = (message: string, error?: unknown): void => {
-  console.error(`[Embedding Transformer] ${message}`, error);
-};
-
-const loadModel = async (): Promise<EmbeddingPipeline> => {
-  logInfo(`Loading model: ${EMBEDDING_MODEL_NAME}...`);
+const loadModel = async (): Promise<FeatureExtractionPipeline> => {
+  console.log(`[Embedding Transformer] Loading model: ${EMBEDDING_MODEL_NAME}...`);
   const pipelineInstance = await pipeline('feature-extraction', EMBEDDING_MODEL_NAME);
-  logInfo('Model loaded successfully.');
-  return pipelineInstance as EmbeddingPipeline;
+  console.log('[Embedding Transformer] Model loaded successfully.');
+  return pipelineInstance as FeatureExtractionPipeline;
 };
 
-const getOrLoadModel = async (): Promise<EmbeddingPipeline> => {
+const getOrLoadModel = async (): Promise<FeatureExtractionPipeline> => {
   if (!embedder) {
     embedder = await loadModel();
   }
@@ -68,7 +57,7 @@ const setContentEmbedding = (
   };
 };
 
-logInfo('Initializing...');
+console.log('[Embedding Transformer] Initializing...');
 
 export default defineTransformer({
   name: 'embeddingGenerator',
@@ -89,7 +78,7 @@ export default defineTransformer({
     
     if (result.error) {
       const errorMessage = result.error instanceof Error ? result.error.message : 'Unknown error';
-      logError(`Error generating embedding for ${blogContent.path}:`, result.error);
+      console.error(`[Embedding Transformer] Error generating embedding for ${blogContent.path}:`, result.error);
       return setContentEmbedding(blogContent, null, `Embedding generation failed: ${errorMessage}`);
     }
     
