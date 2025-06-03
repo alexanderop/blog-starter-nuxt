@@ -103,117 +103,378 @@ function getCommonQueries(): QueryOption[] {
     { name: 'File Extensions', sql: 'SELECT DISTINCT extension FROM _content_blog;' },
     { name: 'Content Info Table', sql: 'SELECT * FROM _content_info;' },
     { name: 'Cache Table', sql: 'SELECT * FROM _development_cache LIMIT 5;' },
+    
+    // New Semantic Embeddings Queries
     { 
-      name: 'Embeddings Status', 
-      sql: 'SELECT title, CASE WHEN embedding IS NOT NULL THEN "✓ Has Embedding" ELSE "✗ No Embedding" END as embedding_status, embeddingError FROM _content_blog;' 
-    },
-    { 
-      name: 'Cosine Similarity Matrix', 
-      sql: `WITH post_pairs AS (
-  SELECT 
-    a.id as post_a_id,
-    a.title as post_a_title,
-    a.path as post_a_path,
-    b.id as post_b_id, 
-    b.title as post_b_title,
-    b.path as post_b_path,
-    a.embedding as embedding_a,
-    b.embedding as embedding_b
-  FROM _content_blog a
-  CROSS JOIN _content_blog b
-  WHERE a.id != b.id 
-    AND a.embedding IS NOT NULL 
-    AND b.embedding IS NOT NULL
-    AND json_array_length(a.embedding) > 0
-    AND json_array_length(b.embedding) > 0
-),
-similarity_calc AS (
-  SELECT 
-    post_a_title,
-    post_a_path,
-    post_b_title, 
-    post_b_path,
-    -- Calculate dot product using JSON functions
-    (
-      SELECT SUM(
-        CAST(json_extract(embedding_a, '$[' || (value - 1) || ']') AS REAL) * 
-        CAST(json_extract(embedding_b, '$[' || (value - 1) || ']') AS REAL)
-      )
-      FROM json_each(json_array_length(embedding_a)) 
-      WHERE value <= json_array_length(embedding_b)
-    ) as dot_product,
-    -- Calculate magnitude of vector A
-    (
-      SELECT SQRT(SUM(
-        CAST(json_extract(embedding_a, '$[' || (value - 1) || ']') AS REAL) * 
-        CAST(json_extract(embedding_a, '$[' || (value - 1) || ']') AS REAL)
-      ))
-      FROM json_each(json_array_length(embedding_a))
-    ) as magnitude_a,
-    -- Calculate magnitude of vector B  
-    (
-      SELECT SQRT(SUM(
-        CAST(json_extract(embedding_b, '$[' || (value - 1) || ']') AS REAL) * 
-        CAST(json_extract(embedding_b, '$[' || (value - 1) || ']') AS REAL)
-      ))
-      FROM json_each(json_array_length(embedding_b))
-    ) as magnitude_b
-  FROM post_pairs
-)
-SELECT 
-  post_a_title as "Post A",
-  post_b_title as "Post B", 
-  ROUND(dot_product / (magnitude_a * magnitude_b), 4) as cosine_similarity,
-  CASE 
-    WHEN dot_product / (magnitude_a * magnitude_b) > 0.8 THEN '🔥 Very Similar'
-    WHEN dot_product / (magnitude_a * magnitude_b) > 0.6 THEN '✨ Similar' 
-    WHEN dot_product / (magnitude_a * magnitude_b) > 0.4 THEN '👀 Somewhat Similar'
-    ELSE '📄 Different'
-  END as similarity_level
-FROM similarity_calc
-WHERE magnitude_a > 0 AND magnitude_b > 0
-ORDER BY cosine_similarity DESC
-LIMIT 20;` 
-    },
-    { 
-      name: 'Most Similar Posts (Simplified)', 
+      name: '🧠 Embeddings Status Overview', 
       sql: `SELECT 
-  a.title as "Reference Post",
-  b.title as "Similar Post",
-  ROUND(
-    -- Simplified cosine similarity approximation using first 5 dimensions
-    (
-      CAST(json_extract(a.embedding, '$[0]') AS REAL) * CAST(json_extract(b.embedding, '$[0]') AS REAL) +
-      CAST(json_extract(a.embedding, '$[1]') AS REAL) * CAST(json_extract(b.embedding, '$[1]') AS REAL) +
-      CAST(json_extract(a.embedding, '$[2]') AS REAL) * CAST(json_extract(b.embedding, '$[2]') AS REAL) +
-      CAST(json_extract(a.embedding, '$[3]') AS REAL) * CAST(json_extract(b.embedding, '$[3]') AS REAL) +
-      CAST(json_extract(a.embedding, '$[4]') AS REAL) * CAST(json_extract(b.embedding, '$[4]') AS REAL)
-    ) / (
-      SQRT(
-        CAST(json_extract(a.embedding, '$[0]') AS REAL) * CAST(json_extract(a.embedding, '$[0]') AS REAL) +
-        CAST(json_extract(a.embedding, '$[1]') AS REAL) * CAST(json_extract(a.embedding, '$[1]') AS REAL) +
-        CAST(json_extract(a.embedding, '$[2]') AS REAL) * CAST(json_extract(a.embedding, '$[2]') AS REAL) +
-        CAST(json_extract(a.embedding, '$[3]') AS REAL) * CAST(json_extract(a.embedding, '$[3]') AS REAL) +
-        CAST(json_extract(a.embedding, '$[4]') AS REAL) * CAST(json_extract(a.embedding, '$[4]') AS REAL)
-      ) *
-      SQRT(
-        CAST(json_extract(b.embedding, '$[0]') AS REAL) * CAST(json_extract(b.embedding, '$[0]') AS REAL) +
-        CAST(json_extract(b.embedding, '$[1]') AS REAL) * CAST(json_extract(b.embedding, '$[1]') AS REAL) +
-        CAST(json_extract(b.embedding, '$[2]') AS REAL) * CAST(json_extract(b.embedding, '$[2]') AS REAL) +
-        CAST(json_extract(b.embedding, '$[3]') AS REAL) * CAST(json_extract(b.embedding, '$[3]') AS REAL) +
-        CAST(json_extract(b.embedding, '$[4]') AS REAL) * CAST(json_extract(b.embedding, '$[4]') AS REAL)
+        title, 
+        path,
+        CASE 
+          WHEN embeddings IS NOT NULL THEN 
+            '✅ Has ' || json_array_length(embeddings) || ' chunks'
+          ELSE '❌ No embeddings' 
+        END as embedding_status,
+        CASE 
+          WHEN embeddingError IS NOT NULL THEN '⚠️ ' || embeddingError 
+          ELSE '✅ No errors' 
+        END as error_status
+      FROM _content_blog 
+      ORDER BY embedding_status DESC;` 
+    },
+    
+    { 
+      name: '📊 Semantic Chunk Types Distribution', 
+      sql: `WITH chunk_data AS (
+        SELECT 
+          title,
+          json_each.value as chunk_json
+        FROM _content_blog, json_each(embeddings)
+        WHERE embeddings IS NOT NULL
+      ),
+      chunk_types AS (
+        SELECT 
+          title,
+          json_extract(chunk_json, '$.type') as chunk_type,
+          json_extract(chunk_json, '$.level') as chunk_level,
+          length(json_extract(chunk_json, '$.text')) as text_length
+        FROM chunk_data
       )
-    ), 4
-  ) as similarity_score
-FROM _content_blog a
-CROSS JOIN _content_blog b  
-WHERE a.id != b.id
-  AND a.embedding IS NOT NULL 
-  AND b.embedding IS NOT NULL
-  AND json_array_length(a.embedding) >= 5
-  AND json_array_length(b.embedding) >= 5
-ORDER BY similarity_score DESC
-LIMIT 15;` 
+      SELECT 
+        chunk_type,
+        COUNT(*) as count,
+        AVG(text_length) as avg_text_length,
+        MIN(text_length) as min_length,
+        MAX(text_length) as max_length
+      FROM chunk_types 
+      GROUP BY chunk_type 
+      ORDER BY count DESC;` 
+    },
+    
+    { 
+      name: '🎯 Chunk Details by Post', 
+      sql: `WITH chunk_data AS (
+        SELECT 
+          title,
+          path,
+          json_each.value as chunk_json
+        FROM _content_blog, json_each(embeddings)
+        WHERE embeddings IS NOT NULL
+      )
+      SELECT 
+        title,
+        json_extract(chunk_json, '$.type') as type,
+        CASE 
+          WHEN json_extract(chunk_json, '$.level') IS NOT NULL 
+          THEN 'H' || json_extract(chunk_json, '$.level')
+          ELSE '-'
+        END as level,
+        length(json_extract(chunk_json, '$.text')) as chars,
+        substr(json_extract(chunk_json, '$.text'), 1, 100) || '...' as preview,
+        json_extract(chunk_json, '$.id') as chunk_id
+      FROM chunk_data 
+      ORDER BY title, type, level;` 
+    },
+    
+    { 
+      name: '🔍 Find Similar Chunks (Simple)', 
+      sql: `WITH chunk_pairs AS (
+        SELECT 
+          a.title as post_a,
+          json_extract(a_chunk.value, '$.type') as type_a,
+          json_extract(a_chunk.value, '$.text') as text_a,
+          json_extract(a_chunk.value, '$.id') as id_a,
+          b.title as post_b,
+          json_extract(b_chunk.value, '$.type') as type_b,
+          json_extract(b_chunk.value, '$.text') as text_b,
+          json_extract(b_chunk.value, '$.id') as id_b,
+          json_extract(a_chunk.value, '$.vector') as vector_a,
+          json_extract(b_chunk.value, '$.vector') as vector_b
+        FROM _content_blog a, json_each(a.embeddings) a_chunk
+        CROSS JOIN _content_blog b, json_each(b.embeddings) b_chunk
+        WHERE a.id != b.id 
+          AND a.embeddings IS NOT NULL 
+          AND b.embeddings IS NOT NULL
+          AND json_extract(a_chunk.value, '$.id') != json_extract(b_chunk.value, '$.id')
+      ),
+      similarity_calc AS (
+        SELECT 
+          post_a,
+          type_a,
+          substr(text_a, 1, 50) || '...' as preview_a,
+          post_b,
+          type_b,
+          substr(text_b, 1, 50) || '...' as preview_b,
+          -- Simple dot product of first 5 dimensions for performance
+          (
+            CAST(json_extract(vector_a, '$[0]') AS REAL) * CAST(json_extract(vector_b, '$[0]') AS REAL) +
+            CAST(json_extract(vector_a, '$[1]') AS REAL) * CAST(json_extract(vector_b, '$[1]') AS REAL) +
+            CAST(json_extract(vector_a, '$[2]') AS REAL) * CAST(json_extract(vector_b, '$[2]') AS REAL) +
+            CAST(json_extract(vector_a, '$[3]') AS REAL) * CAST(json_extract(vector_b, '$[3]') AS REAL) +
+            CAST(json_extract(vector_a, '$[4]') AS REAL) * CAST(json_extract(vector_b, '$[4]') AS REAL)
+          ) as similarity_score
+        FROM chunk_pairs
+        WHERE vector_a IS NOT NULL AND vector_b IS NOT NULL
+          AND json_array_length(vector_a) >= 5
+          AND json_array_length(vector_b) >= 5
+      )
+      SELECT 
+        post_a || ' [' || type_a || ']' as "Source",
+        post_b || ' [' || type_b || ']' as "Similar To",
+        ROUND(similarity_score, 4) as similarity,
+        CASE 
+          WHEN similarity_score > 0.8 THEN '🔥 Very Similar'
+          WHEN similarity_score > 0.5 THEN '✨ Similar' 
+          WHEN similarity_score > 0.2 THEN '👀 Somewhat Similar'
+          ELSE '📄 Different'
+        END as level,
+        preview_a as "Text A",
+        preview_b as "Text B"
+      FROM similarity_calc
+      WHERE similarity_score > 0.1
+      ORDER BY similarity_score DESC
+      LIMIT 20;` 
+    },
+    
+    { 
+      name: '🐛 Debug: Check Embeddings Data', 
+      sql: `SELECT 
+        title,
+        CASE 
+          WHEN embeddings IS NULL THEN 'NULL'
+          WHEN embeddings = '' THEN 'EMPTY STRING'
+          WHEN json_valid(embeddings) = 0 THEN 'INVALID JSON'
+          ELSE 'VALID: ' || json_array_length(embeddings) || ' chunks'
+        END as embeddings_status,
+        CASE 
+          WHEN embeddings IS NOT NULL AND json_valid(embeddings) = 1 AND json_array_length(embeddings) > 0 THEN
+            json_extract(embeddings, '$[0].type') || ' - ' || 
+            COALESCE(json_array_length(json_extract(embeddings, '$[0].vector')), 'NO_VECTOR') || ' dims'
+          ELSE 'N/A'
+        END as first_chunk_info
+      FROM _content_blog
+      ORDER BY embeddings_status DESC;` 
+    },
+    
+    { 
+      name: '🔧 Debug: Sample Embedding Vectors', 
+      sql: `SELECT 
+        title,
+        json_extract(chunk.value, '$.type') as chunk_type,
+        json_extract(chunk.value, '$.id') as chunk_id,
+        json_array_length(json_extract(chunk.value, '$.vector')) as vector_length,
+        CASE 
+          WHEN json_array_length(json_extract(chunk.value, '$.vector')) >= 5 THEN
+            '[' || 
+            json_extract(chunk.value, '$.vector[0]') || ', ' ||
+            json_extract(chunk.value, '$.vector[1]') || ', ' ||
+            json_extract(chunk.value, '$.vector[2]') || ', ' ||
+            json_extract(chunk.value, '$.vector[3]') || ', ' ||
+            json_extract(chunk.value, '$.vector[4]') || ', ...]'
+          ELSE 'INSUFFICIENT_DIMS'
+        END as vector_sample
+      FROM _content_blog, json_each(embeddings) chunk
+      WHERE embeddings IS NOT NULL 
+        AND json_valid(embeddings) = 1
+      LIMIT 10;` 
+    },
+    
+    { 
+      name: '🚀 Simple Chunk Similarity Test', 
+      sql: `-- Test with just first 2 chunks from same post and different posts
+      WITH sample_chunks AS (
+        SELECT 
+          ROW_NUMBER() OVER() as row_num,
+          title,
+          json_extract(chunk.value, '$.type') as chunk_type,
+          json_extract(chunk.value, '$.text') as chunk_text,
+          json_extract(chunk.value, '$.vector') as chunk_vector
+        FROM _content_blog, json_each(embeddings) chunk
+        WHERE embeddings IS NOT NULL 
+          AND json_valid(embeddings) = 1
+          AND json_array_length(json_extract(chunk.value, '$.vector')) >= 5
+        LIMIT 4
+      )
+      SELECT 
+        a.title as "Post A",
+        a.chunk_type as "Type A", 
+        substr(a.chunk_text, 1, 40) || '...' as "Text A",
+        b.title as "Post B",
+        b.chunk_type as "Type B",
+        substr(b.chunk_text, 1, 40) || '...' as "Text B",
+        ROUND(
+          (
+            CAST(json_extract(a.chunk_vector, '$[0]') AS REAL) * CAST(json_extract(b.chunk_vector, '$[0]') AS REAL) +
+            CAST(json_extract(a.chunk_vector, '$[1]') AS REAL) * CAST(json_extract(b.chunk_vector, '$[1]') AS REAL) +
+            CAST(json_extract(a.chunk_vector, '$[2]') AS REAL) * CAST(json_extract(b.chunk_vector, '$[2]') AS REAL)
+          ), 4
+        ) as similarity
+      FROM sample_chunks a
+      CROSS JOIN sample_chunks b  
+      WHERE a.row_num != b.row_num;` 
+    },
+    
+    { 
+      name: '📈 Embedding Vector Analysis', 
+      sql: `WITH vector_stats AS (
+        SELECT 
+          title,
+          json_extract(chunk.value, '$.type') as chunk_type,
+          json_extract(chunk.value, '$.id') as chunk_id,
+          json_array_length(json_extract(chunk.value, '$.vector')) as vector_length,
+          CAST(json_extract(chunk.value, '$.vector[0]') AS REAL) as first_dim,
+          CAST(json_extract(chunk.value, '$.vector[1]') AS REAL) as second_dim,
+          -- Calculate vector magnitude (first 10 dimensions for performance)
+          SQRT(
+            CAST(json_extract(chunk.value, '$.vector[0]') AS REAL) * CAST(json_extract(chunk.value, '$.vector[0]') AS REAL) +
+            CAST(json_extract(chunk.value, '$.vector[1]') AS REAL) * CAST(json_extract(chunk.value, '$.vector[1]') AS REAL) +
+            CAST(json_extract(chunk.value, '$.vector[2]') AS REAL) * CAST(json_extract(chunk.value, '$.vector[2]') AS REAL) +
+            CAST(json_extract(chunk.value, '$.vector[3]') AS REAL) * CAST(json_extract(chunk.value, '$.vector[3]') AS REAL) +
+            CAST(json_extract(chunk.value, '$.vector[4]') AS REAL) * CAST(json_extract(chunk.value, '$.vector[4]') AS REAL)
+          ) as magnitude_sample
+        FROM _content_blog, json_each(embeddings) chunk
+        WHERE embeddings IS NOT NULL
+      )
+      SELECT 
+        chunk_type,
+        COUNT(*) as total_chunks,
+        AVG(vector_length) as avg_vector_length,
+        AVG(first_dim) as avg_first_dim,
+        AVG(second_dim) as avg_second_dim,
+        AVG(magnitude_sample) as avg_magnitude,
+        MIN(magnitude_sample) as min_magnitude,
+        MAX(magnitude_sample) as max_magnitude
+      FROM vector_stats
+      GROUP BY chunk_type
+      ORDER BY total_chunks DESC;` 
+    },
+    
+    { 
+      name: '🔎 Search Similar Content by Keyword', 
+      sql: `-- Replace 'javascript' with your search term
+      WITH target_chunks AS (
+        SELECT 
+          title,
+          json_extract(chunk.value, '$.type') as chunk_type,
+          json_extract(chunk.value, '$.text') as chunk_text,
+          json_extract(chunk.value, '$.vector') as chunk_vector,
+          json_extract(chunk.value, '$.id') as chunk_id
+        FROM _content_blog, json_each(embeddings) chunk
+        WHERE embeddings IS NOT NULL
+          AND LOWER(json_extract(chunk.value, '$.text')) LIKE '%javascript%'
+      ),
+      all_chunks AS (
+        SELECT 
+          title,
+          json_extract(chunk.value, '$.type') as chunk_type,
+          json_extract(chunk.value, '$.text') as chunk_text,
+          json_extract(chunk.value, '$.vector') as chunk_vector,
+          json_extract(chunk.value, '$.id') as chunk_id
+        FROM _content_blog, json_each(embeddings) chunk
+        WHERE embeddings IS NOT NULL
+      )
+      SELECT 
+        t.title as "Target Post",
+        t.chunk_type as "Target Type",
+        substr(t.chunk_text, 1, 60) || '...' as "Target Text",
+        a.title as "Similar Post",
+        a.chunk_type as "Similar Type",
+        substr(a.chunk_text, 1, 60) || '...' as "Similar Text",
+        ROUND(
+          (
+            CAST(json_extract(t.chunk_vector, '$[0]') AS REAL) * CAST(json_extract(a.chunk_vector, '$[0]') AS REAL) +
+            CAST(json_extract(t.chunk_vector, '$[1]') AS REAL) * CAST(json_extract(a.chunk_vector, '$[1]') AS REAL) +
+            CAST(json_extract(t.chunk_vector, '$[2]') AS REAL) * CAST(json_extract(a.chunk_vector, '$[2]') AS REAL)
+          ), 4
+        ) as similarity
+      FROM target_chunks t
+      CROSS JOIN all_chunks a
+      WHERE t.chunk_id != a.chunk_id
+        AND t.chunk_vector IS NOT NULL 
+        AND a.chunk_vector IS NOT NULL
+      ORDER BY similarity DESC
+      LIMIT 15;` 
+    },
+    
+    { 
+      name: '🏷️ Heading Structure Analysis', 
+      sql: `WITH headings AS (
+        SELECT 
+          title,
+          path,
+          json_extract(chunk.value, '$.type') as chunk_type,
+          json_extract(chunk.value, '$.level') as heading_level,
+          json_extract(chunk.value, '$.text') as heading_text
+        FROM _content_blog, json_each(embeddings) chunk
+        WHERE embeddings IS NOT NULL
+          AND json_extract(chunk.value, '$.type') = 'heading'
+      )
+      SELECT 
+        title,
+        'H' || heading_level as level,
+        heading_text as "Heading Text",
+        length(heading_text) as char_count
+      FROM headings
+      ORDER BY title, CAST(heading_level AS INTEGER);` 
+    },
+    
+    { 
+      name: '⚠️ Embedding Debug Issues', 
+      sql: `SELECT 
+        title,
+        path,
+        CASE 
+          WHEN embeddings IS NULL THEN '❌ No embeddings generated'
+          WHEN json_array_length(embeddings) = 0 THEN '⚠️ Empty embeddings array'
+          WHEN embeddingError IS NOT NULL THEN '💥 Error: ' || embeddingError
+          ELSE '✅ OK (' || json_array_length(embeddings) || ' chunks)'
+        END as status,
+        CASE 
+          WHEN embeddings IS NOT NULL THEN 
+            (SELECT COUNT(*) FROM json_each(embeddings) 
+             WHERE json_extract(value, '$.vector') IS NULL) 
+          ELSE NULL 
+        END as chunks_without_vectors,
+        lastModified
+      FROM _content_blog
+      ORDER BY 
+        CASE 
+          WHEN embeddings IS NULL THEN 1
+          WHEN embeddingError IS NOT NULL THEN 2
+          WHEN json_array_length(embeddings) = 0 THEN 3
+          ELSE 4
+        END,
+        lastModified DESC;` 
+    },
+    
+    { 
+      name: '🎨 Content Type Distribution', 
+      sql: `WITH content_chunks AS (
+        SELECT 
+          json_extract(chunk.value, '$.type') as chunk_type,
+          length(json_extract(chunk.value, '$.text')) as text_length,
+          json_array_length(json_extract(chunk.value, '$.vector')) as vector_dim
+        FROM _content_blog, json_each(embeddings) chunk
+        WHERE embeddings IS NOT NULL
+      )
+      SELECT 
+        chunk_type as "Content Type",
+        COUNT(*) as "Total Chunks",
+        ROUND(AVG(text_length), 1) as "Avg Text Length",
+        ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM content_chunks), 1) as "Percentage %",
+        MIN(vector_dim) as "Min Vector Dim",
+        MAX(vector_dim) as "Max Vector Dim",
+        CASE chunk_type
+          WHEN 'heading' THEN '📝'
+          WHEN 'paragraph' THEN '📄'
+          WHEN 'code' THEN '💻'
+          WHEN 'list' THEN '📋'
+          WHEN 'quote' THEN '💬'
+          ELSE '📦'
+        END as icon
+      FROM content_chunks
+      GROUP BY chunk_type
+      ORDER BY COUNT(*) DESC;` 
     }
   ]
 }

@@ -17,9 +17,12 @@ if (allPosts.value) {
     '#': index + 1,
     'Title': post.title,
     'Path': post.path || 'N/A',
-    'Has Embedding': post.embedding ? '✅ Yes' : '❌ No',
-    'Embedding Length': post.embedding?.length || 0,
-    'First 5 Values': post.embedding?.slice(0, 5)?.map(n => n.toFixed(4)).join(', ') || 'None',
+    'embeddings': post.embeddings,
+    'rawbody': post.rawbody?.slice(0, 20) || 'N/A',
+    'Has Embeddings': post.embeddings ? '✅ Yes' : '❌ No',
+    'Embeddings Count': post.embeddings?.length || 0,
+    'First Embedding Vector Length': post.embeddings?.[0]?.vector?.length || 0,
+    'First 5 Values': post.embeddings?.[0]?.vector?.slice(0, 5)?.map((n: number) => n.toFixed(4)).join(', ') || 'None',
     'Error': post.embeddingError || 'None'
   }));
   

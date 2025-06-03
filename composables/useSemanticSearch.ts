@@ -29,7 +29,7 @@ export const useSemanticSearch = (searchQuery: Ref<string>) => {
 
   const { data: allPosts } = useAsyncData('all-posts-for-semantic-search', () => 
     queryCollection('blog')
-      .select('title', 'description', 'path', 'date', 'tags', 'body', 'embedding')
+      .select('title', 'description', 'path', 'date', 'tags', 'body', 'embeddings')
       .all()
   )
 
@@ -41,12 +41,34 @@ export const useSemanticSearch = (searchQuery: Ref<string>) => {
     const queryEmbedding = await generateQueryEmbedding(query)
     
     const postsWithSimilarity = allPosts.value
-      .filter(post => post.embedding && post.embedding.length > 0)
-      .map(post => ({
-        post,
-        similarity: cosineSimilarity(queryEmbedding, post.embedding!)
-      }))
-      .sort((a, b) => b.similarity - a.similarity)
+      .filter(post => post.embeddings && Array.isArray(post.embeddings) && post.embeddings.length > 0)
+      .map(post => {
+        // Parse embeddings if they're stored as string (from SQL)
+        let embeddings = post.embeddings
+        if (typeof embeddings === 'string') {
+          try {
+            embeddings = JSON.parse(embeddings)
+          } catch {
+            return null
+          }
+        }
+        
+        if (!Array.isArray(embeddings)) return null
+        
+        // Calculate similarity with each chunk and use the highest similarity
+        const maxSimilarity = Math.max(
+          ...embeddings.map(embedding => 
+            embedding.vector ? cosineSimilarity(queryEmbedding, embedding.vector) : 0
+          )
+        )
+        
+        return {
+          post,
+          similarity: maxSimilarity
+        }
+      })
+      .filter(item => item !== null)
+      .sort((a, b) => b!.similarity - a!.similarity)
       .slice(0, 20)
 
     return postsWithSimilarity.map(({ post, similarity }) => ({
