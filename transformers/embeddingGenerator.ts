@@ -18,7 +18,8 @@ export default defineTransformer({
     if (!blogContent.title || !blogContent.description) {
       return {
         ...blogContent,
-        embedding: null
+        embedding: null,
+        embeddingError: 'Content is missing title or description'
       };
     }
 
@@ -31,7 +32,8 @@ export default defineTransformer({
     if (!textToEmbed) {
       return {
         ...blogContent,
-        embedding: null
+        embedding: null,
+        embeddingError: 'Content is empty'
       };
     }
 
@@ -42,7 +44,7 @@ export default defineTransformer({
     }
 
     const embeddingResult = await tryCatch((async () => {
-      const output = await embedder!(textToEmbed, { pooling: 'mean', normalize: true });
+      const output = await embedder(textToEmbed, { pooling: 'mean', normalize: true });
       return Array.from((output as Tensor).data as Float32Array);
     })());
     
@@ -52,13 +54,14 @@ export default defineTransformer({
       return {
         ...blogContent,
         embedding: null,
-        embeddingError: `Embedding generation failed: ${errorMessage}`
+        embeddingError: errorMessage
       };
     }
     
     return {
       ...blogContent,
-      embedding: embeddingResult.data
+      embedding: embeddingResult.data,
+      embeddingError: null
     };
   }
 });
