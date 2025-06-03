@@ -31,7 +31,7 @@ const internalValue = computed({
 const highlightedCode = computed(() => {
   if (!modelValue) return ''
   try {
-    return Prism.highlight(modelValue, Prism.languages.sql, 'sql')
+    return Prism.highlight(modelValue, Prism.languages.sql || {}, 'sql')
   } catch (error) {
     console.warn('Prism highlighting failed:', error)
     return modelValue
@@ -70,7 +70,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
       const endPos = lineEnd === -1 ? value.length : lineEnd
       
       const selectedLines = value.substring(lineStart, endPos)
-      const unindentedLines = selectedLines.replace(/^  /gm, '')
+      const unindentedLines = selectedLines.replace(/^ {2}/gm, '')
       
       const newValue = value.substring(0, lineStart) + unindentedLines + value.substring(endPos)
       internalValue.value = newValue
