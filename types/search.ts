@@ -3,7 +3,7 @@ import type { BlogCollectionItem } from '@nuxt/content'
 export interface SearchResult extends BlogCollectionItem {
   id: string
   content: string
-  slug: string
+  slug?: string
   excerpt: string
 }
 
