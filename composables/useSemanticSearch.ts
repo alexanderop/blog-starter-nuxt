@@ -1,36 +1,12 @@
-import type { BlogCollectionItem } from '@nuxt/content'
 import { EMBEDDING_MODEL_NAME } from '~/shared/constants/models'
+import type { FeatureExtractionPipeline } from '@xenova/transformers'
 
-interface EmbeddingPipeline {
-  (text: string, options: { pooling: string; normalize: boolean }): Promise<{ data: Float32Array }>
-}
+let embedder: FeatureExtractionPipeline | null = null
 
-let embedder: EmbeddingPipeline | null = null
-
-const createSearchResult = (post: Pick<BlogCollectionItem, "title" | "tags" | "description" | "date" | "embedding" | "path" | "body">, similarity: number): SearchResult => ({
-  id: post.path || String(Date.now() * Math.random()),
-  title: post.title || 'Untitled',
-  description: post.description || '',
-  tags: post.tags || [],
-  date: post.date || new Date().toISOString(),
-  slug: post.path?.split('/').pop() || '',
-  excerpt: post.description?.slice(0, 150) + '...' || '',
-  content: post.description || '',
-  path: post.path || '',
-  seo: {},
-  body: post.body || {},
-  stem: post.path?.split('/').pop()?.replace(/\.[^/.]+$/, '') || '',
-  readingTime: 0,
-  wordCount: 0,
-  extension: 'md',
-  meta: {},
-  similarity
-})
-
-const getOrLoadModel = async (): Promise<EmbeddingPipeline> => {
+const getOrLoadModel = async (): Promise<FeatureExtractionPipeline> => {
   if (!embedder) {
     const { pipeline } = await import('@xenova/transformers')
-    embedder = await pipeline('feature-extraction', EMBEDDING_MODEL_NAME) as EmbeddingPipeline
+    embedder = await pipeline('feature-extraction', EMBEDDING_MODEL_NAME) as FeatureExtractionPipeline
   }
   return embedder
 }
@@ -48,7 +24,7 @@ export const useSemanticSearch = (searchQuery: Ref<string>) => {
 
   const debouncedSearchQuery = refDebounced(searchQuery, 300)
   
-  const results = ref<SearchResult[]>([])
+  const results = ref<DisplaySearchResult[]>([])
   const isLoading = ref(false)
 
   const { data: allPosts } = useAsyncData('all-posts-for-semantic-search', () => 
@@ -73,9 +49,17 @@ export const useSemanticSearch = (searchQuery: Ref<string>) => {
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, 20)
 
-    return postsWithSimilarity.map(({ post, similarity }) => 
-      createSearchResult(post, similarity)
-    )
+    return postsWithSimilarity.map(({ post, similarity }) => ({
+      id: post.path || String(Date.now() * Math.random()),
+      title: post.title,
+      description: post.description,
+      tags: post.tags,
+      date: post.date,
+      slug: post.path?.split('/').pop() || '',
+      excerpt: post.description?.slice(0, 150) + '...',
+      content: post.description,
+      similarity
+    }))
   }
 
   watch(
