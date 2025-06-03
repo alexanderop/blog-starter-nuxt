@@ -1,15 +1,12 @@
 import { EMBEDDING_MODEL_NAME } from '~/shared/constants/models'
+import type { FeatureExtractionPipeline } from '@xenova/transformers'
 
-interface EmbeddingPipeline {
-  (text: string, options: { pooling: string; normalize: boolean }): Promise<{ data: Float32Array }>
-}
+let embedder: FeatureExtractionPipeline | null = null
 
-let embedder: EmbeddingPipeline | null = null
-
-const getOrLoadModel = async (): Promise<EmbeddingPipeline> => {
+const getOrLoadModel = async (): Promise<FeatureExtractionPipeline> => {
   if (!embedder) {
     const { pipeline } = await import('@xenova/transformers')
-    embedder = await pipeline('feature-extraction', EMBEDDING_MODEL_NAME) as EmbeddingPipeline
+    embedder = await pipeline('feature-extraction', EMBEDDING_MODEL_NAME) as FeatureExtractionPipeline
   }
   return embedder
 }
