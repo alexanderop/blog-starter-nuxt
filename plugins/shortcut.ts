@@ -31,7 +31,7 @@ export default defineNuxtPlugin(() => {
           }
           break
           
-        case 'scroll':
+        case 'scroll': {
           const scrollTarget = getScrollTarget()
           
           if (action.target === 'top') {
@@ -44,7 +44,8 @@ export default defineNuxtPlugin(() => {
             if (scrollTarget === window) {
               window.scrollTo(0, document.body.scrollHeight)
             } else {
-              scrollTarget?.scrollTo?.(0, scrollTarget.scrollHeight)
+              const element = scrollTarget as HTMLElement
+              element?.scrollTo?.(0, element.scrollHeight)
             }
           } else if (action.scrollAmount) {
             if (scrollTarget === window) {
@@ -54,6 +55,7 @@ export default defineNuxtPlugin(() => {
             }
           }
           break
+        }
           
         case 'external':
           if (action.target) {

@@ -20,6 +20,7 @@ export type DisplaySearchResult = Pick<SearchResult,
   | 'slug'
   | 'excerpt'
   | 'content'
+  | 'similarity'
 >
 
 export type SearchMode = 'keyword' | 'fuzzy' | 'semantic' | 'hybrid'
