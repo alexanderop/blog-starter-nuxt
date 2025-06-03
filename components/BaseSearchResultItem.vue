@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import type { SearchResult, SearchMode } from '~/types/search'
-
 const { 
   result,
   searchQuery = '',
   searchMode = 'keyword'
 } = defineProps<{
-  result: SearchResult
+  result: DisplaySearchResult
   searchQuery?: string
   searchMode?: SearchMode
 }>()
