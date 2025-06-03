@@ -5,17 +5,6 @@ interface EmbeddingPipeline {
   (text: string, options: { pooling: string; normalize: boolean }): Promise<{ data: Float32Array }>
 }
 
-interface BlogPost {
-  path?: string
-  title?: string
-  description?: string
-  tags?: string[]
-  date?: string
-  body?: string
-  embedding?: number[]
-}
-
-// Module-level state to maintain embedder instance
 let embedder: EmbeddingPipeline | null = null
 
 const createSearchResult = (post: Pick<BlogCollectionItem, "title" | "tags" | "description" | "date" | "embedding" | "path" | "body">, similarity: number): SearchResult => ({
