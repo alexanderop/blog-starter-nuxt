@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { SearchResult, SearchMode } from '~/types/search'
-
 const { 
   results = [], 
   loading = false,
@@ -8,7 +6,7 @@ const {
   totalResults = 0,
   searchMode = 'keyword'
 } = defineProps<{
-  results?: SearchResult[]
+  results?: DisplaySearchResult[]
   loading?: boolean
   query?: string
   totalResults?: number
