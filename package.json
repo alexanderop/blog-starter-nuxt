@@ -9,7 +9,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "clean:content": "rm -f .data/content/contents.sqlite",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "nuxt typecheck",
+    "embedding": "node scripts/run-embedding-demo.js"
   },
   "dependencies": {
     "@nuxt/content": "^3.5.1",
