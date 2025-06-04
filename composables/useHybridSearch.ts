@@ -21,23 +21,15 @@ export const useHybridSearch = (query: Ref<string>, opts: Opts = {}) => {
   } = opts
 
   const merged = computed(() => {
-    const bucket: Map<string, { item: DisplaySearchResult; score: number }> = new Map()
-    const add = (arr: DisplaySearchResult[], weight: number) => {
-      arr.forEach((item, idx) => {
-        const slug = item.slug ?? item.id
-        const score = weight * (1 / (idx + rrfK))
-        const prev = bucket.get(slug)
-        bucket.set(slug, prev ? { item, score: prev.score + score } : { item, score })
-      })
+    const rankedLists = [
+      { items: fuzzy.value, weight: fuzzyWeight }
+    ]
+    
+    if (isSupported.value) {
+      rankedLists.push({ items: semantic.value, weight: semanticWeight })
     }
-
-    add(fuzzy.value, fuzzyWeight)
-    if (isSupported.value) add(semantic.value, semanticWeight)
-
-    return [...bucket.values()]
-      .sort((a, b) => b.score - a.score)
-      .slice(0, limit)
-      .map(({ item }) => item)
+    
+    return reciprocalRankFusion(rankedLists, { k: rrfK, limit })
   })
 
   const searchInfo = computed(() => ({
