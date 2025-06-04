@@ -20,6 +20,21 @@ Each exercise has a ready solution branch if you can't continue; feel free to ch
 - `03-semantic`
 - `04-hybrid`
 
+## 🎯 Try the Embedding Demo First!
+
+Before diving into the exercises, run our BGE embedding model demo to understand how semantic search works:
+
+```bash
+npm run demo:embeddings
+```
+
+This interactive demo shows:
+- How text gets converted into 384-dimensional vectors
+- How semantic similarity search works with real examples
+- Why "What is a panda?" finds panda-related content even without exact keyword matches
+
+
+
 ## Prerequisites
 
 1. Clone the repo or Fork the Project if you want (https://github.com/alexanderop/blog-starter-nuxt)
