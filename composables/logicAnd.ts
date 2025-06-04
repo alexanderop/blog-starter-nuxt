@@ -6,8 +6,8 @@ import { computed, toValue } from 'vue'
  *
  * @see https://vueuse.org/logicAnd
  */
-export function logicAnd(...args: MaybeRefOrGetter<any>[]): ComputedRef<boolean> {
-  return computed(() => args.every(i => toValue(i)))
+export function logicAnd<T>(...args: MaybeRefOrGetter<T>[]): ComputedRef<boolean> {
+  return computed(() => args.every(i => Boolean(toValue(i))))
 }
 
 // alias
