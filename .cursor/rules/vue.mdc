@@ -1,5 +1,5 @@
 ---
-description: 
+description: Vue 3.5 coding guidelines for .vue files
 globs: *.vue
 alwaysApply: false
 ---
@@ -7,18 +7,17 @@ alwaysApply: false
 
 ## General
 
-- script part always first then template
-- never define emits or props type outside directly use them in 
-defineProps or defineEmits
+- Place the `<script setup>` block before the template.
+- Define props and emits directly inside `defineProps` and `defineEmits`.
 
 always define them like
 
 ```vue
-const { 
-  modelValue, 
-  placeholder = 'Search...', 
+const {
+  modelValue,
+  placeholder = 'Search...',
   disabled = false,
-  autofocus = false 
+  autofocus = false
 } = defineProps<{
   modelValue: string
   placeholder?: string
@@ -26,6 +25,7 @@ const {
   autofocus?: boolean
 }>()
 ```
+
 
 ## VueUse First Approach
 - **ALWAYS** search the web first to check if VueUse has a composable that can solve the problem
