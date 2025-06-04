@@ -73,22 +73,6 @@ const getSourceColor = (source: string) => {
   return 'text-green-400 bg-green-500/20 border-green-400/30'
 }
 
-const getTooltipContent = () => {
-  if (!result.source) return ''
-  
-  let content = `Found by: ${getSourceLabel(result.source)}`
-  
-  if (result.source === 'both' && result.fuzzyScore && result.semanticScore) {
-    content += `\nFuzzy Score: ${(result.fuzzyScore * 100).toFixed(0)}%`
-    content += `\nSemantic Score: ${(result.semanticScore * 100).toFixed(0)}%`
-    content += `\nFinal Score: ${(result.similarity! * 100).toFixed(0)}%`
-  } else if (result.similarity) {
-    content += `\nScore: ${(result.similarity * 100).toFixed(0)}%`
-  }
-  
-  return content
-}
-
 const calculateWeightedScore = () => {
   if (result.source === 'both' && result.fuzzyScore && result.semanticScore) {
     const fuzzyWeight = 0.4
@@ -155,7 +139,7 @@ const calculateWeightedScore = () => {
           </div>
           
           <!-- Tooltip Arrow -->
-          <div class="absolute -top-1 right-3 w-2 h-2 bg-gray-900/95 border-l border-t border-gray-600/80 transform rotate-45"></div>
+          <div class="absolute -top-1 right-3 w-2 h-2 bg-gray-900/95 border-l border-t border-gray-600/80 transform rotate-45"/>
         </div>
       </div>
     </div>
@@ -213,7 +197,8 @@ const calculateWeightedScore = () => {
     </div>
     
     <!-- Hover Arrow -->
-    <div class="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-200" :class="{ 
+    <div
+class="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-200" :class="{ 
       'right-10': (searchMode === 'semantic' || searchMode === 'hybrid') && (result.similarity !== undefined || result.source)
     }">
       <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

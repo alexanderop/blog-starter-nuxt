@@ -40,8 +40,16 @@ export const useHybridSearch = (query: Ref<string>, opts: Opts = {}) => {
       .map(({ item }) => item)
   })
 
+  const searchInfo = computed(() => ({
+    isHybrid: isSupported.value && query.value.length > 0,
+    totalFuzzyResults: fuzzy.value.length,
+    totalSemanticResults: isSupported.value ? semantic.value.length : 0
+  }))
+
   return {
     results: merged,
-    isLoading: computed(() => fuzzyLoading.value || semLoading.value)
+    isLoading: computed(() => fuzzyLoading.value || semLoading.value),
+    isSupported,
+    searchInfo
   }
 }

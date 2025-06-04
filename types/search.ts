@@ -21,6 +21,9 @@ export type DisplaySearchResult = Pick<SearchResult,
   | 'excerpt'
   | 'content'
   | 'similarity'
+  | 'source'
+  | 'fuzzyScore'
+  | 'semanticScore'
 >
 
 export type SearchMode = 'keyword' | 'fuzzy' | 'semantic' | 'hybrid'
