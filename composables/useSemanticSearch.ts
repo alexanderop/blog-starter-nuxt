@@ -29,7 +29,7 @@ export const useSemanticSearch = (searchQuery: Ref<string>) => {
 
   const { data: allPosts } = useAsyncData('all-posts-for-semantic-search', () => 
     queryCollection('blog')
-      .select('title', 'description', 'path', 'date', 'tags', 'body', 'embedding')
+      .select('title', 'description', 'path', 'date', 'tags', 'embedding')
       .all()
   )
 
