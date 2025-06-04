@@ -1,9 +1,9 @@
 ---
-description: 
-globs: 
+description: General coding guidelines
+globs:
+  - '**/*'
 alwaysApply: true
 ---
-- never add comments try to make everything redable with variable names or code only
-
-- prefer functional core imperative shell pattern
-- try to never use any in typescript
+- Avoid code comments; rely on clear variable and function names for readability.
+- Prefer the functional-core, imperative-shell pattern.
+- Avoid using the `any` type in TypeScript.
