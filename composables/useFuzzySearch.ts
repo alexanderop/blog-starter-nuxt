@@ -2,20 +2,22 @@ import Fuse from 'fuse.js'
 import type { SearchResult } from '~/types/search'
 
 export const useFuzzySearch = (searchQuery: Ref<string>) => {
-  const { data: allPosts } = useAsyncData('all-posts-for-fuzzy-search', () => 
+  const { data: allPosts, pending } = useAsyncData('all-posts-for-fuzzy-search', () =>
     queryCollection('blog')
       .select('title', 'description', 'path', 'date', 'tags', 'body', 'readingTime', 'wordCount', 'lastModified')
       .all()
   )
 
-  const fuse = new Fuse(allPosts.value || [], {
+  const options: Fuse.IFuseOptions<SearchResult> = {
     keys: ['title', 'description', 'tags'],
     threshold: 0.4,
     distance: 100,
     minMatchCharLength: 2,
     includeScore: true,
     ignoreLocation: true,
-  })
+  }
+
+  const fuse = computed(() => new Fuse(allPosts.value || [], { ...options }))
 
   const results = computed(() => {
     const query = searchQuery.value.trim()
@@ -23,7 +25,7 @@ export const useFuzzySearch = (searchQuery: Ref<string>) => {
       return []
     }
 
-    const fuseResults = fuse.search(query)
+    const fuseResults = fuse.value.search(query)
     
     return fuseResults
       .slice(0, 20)
@@ -39,8 +41,8 @@ export const useFuzzySearch = (searchQuery: Ref<string>) => {
       })) as SearchResult[]
   })
   
-  return { 
-    results, 
-    isLoading: computed(() => false)
+  return {
+    results,
+    isLoading: computed(() => pending.value)
   }
 }
