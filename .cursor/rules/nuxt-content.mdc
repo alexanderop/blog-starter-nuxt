@@ -1,6 +1,6 @@
 ---
 description: Questions about Nuxt Content
-globs: 
+globs: '**/*'
 alwaysApply: false
 ---
 # Nuxt Content General Help & Documentation Rule
