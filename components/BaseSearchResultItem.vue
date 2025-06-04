@@ -8,6 +8,7 @@ const {
   searchQuery?: string
   searchMode?: SearchMode
 }>()
+console.log('result', result)
 
 const highlightText = (text: string, query: string): string => {
   if (!query || !text) return text
@@ -89,7 +90,7 @@ const navigateToPost = () => {
       <div class="flex items-center justify-between pt-2 border-t border-gray-700/50">
         <div class="flex flex-wrap gap-2">
           <span
-            v-for="tag in result.tags.slice(0, 3)"
+            v-for="tag in result.tags?.slice(0, 3)"
             :key="tag"
             class="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-blue-500/10 text-blue-300 rounded-full border border-blue-500/20 transition-colors hover:bg-blue-500/20"
           >
@@ -97,10 +98,10 @@ const navigateToPost = () => {
           </span>
           
           <span
-            v-if="result.tags.length > 3"
+            v-if="result.tags?.length > 3"
             class="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-gray-600/30 text-gray-400 rounded-full border border-gray-600/30"
           >
-            +{{ result.tags.length - 3 }}
+            +{{ result.tags?.length - 3 }}
           </span>
         </div>
         

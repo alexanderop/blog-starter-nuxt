@@ -81,7 +81,7 @@ export const useSemanticSearch = (searchQuery: Ref<string>) => {
       excerpt: post.description?.slice(0, 150) + '...',
       content: post.description,
       similarity
-    }))
+    })) as DisplaySearchResult[]
   }
 
   watch(
