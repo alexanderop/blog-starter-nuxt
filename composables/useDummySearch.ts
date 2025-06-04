@@ -1,4 +1,5 @@
 import type { DisplaySearchResult } from '~/types/search'
+import { onWatcherCleanup } from 'vue'
 
 const mockResults: DisplaySearchResult[] = [
   {
@@ -51,9 +52,10 @@ export const useDummySearch = (searchQuery: Ref<string>) => {
   watch(searchQuery, (newQuery) => {
     if (newQuery) {
       isLoading.value = true
-      setTimeout(() => {
+      const id = setTimeout(() => {
         isLoading.value = false
       }, 500)
+      onWatcherCleanup(() => clearTimeout(id))
     }
   })
 
