@@ -1,0 +1,1 @@
+import{_ as s,f as r,g as n,a7 as o}from"./Dxt1SjTU.js";const t={};function a(e,c){return n(),r("li",null,[o(e.$slots,"default")])}const _=Object.assign(s(t,[["render",a]]),{__name:"ProseLi"});export{_ as default};

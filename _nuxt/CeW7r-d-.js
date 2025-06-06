@@ -1,1 +1,0 @@
-import{_ as a,f as s,g as r,a7 as t}from"./Z8lR5SEQ.js";const n={};function o(e,c){return r(),s("table",null,[t(e.$slots,"default")])}const _=Object.assign(a(n,[["render",o]]),{__name:"ProseTable"});export{_ as default};

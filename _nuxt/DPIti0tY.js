@@ -1,0 +1,1 @@
+import{_ as a,f as s,g as r,a7 as t}from"./Dxt1SjTU.js";const n={};function o(e,c){return r(),s("table",null,[t(e.$slots,"default")])}const _=Object.assign(a(n,[["render",o]]),{__name:"ProseTable"});export{_ as default};
