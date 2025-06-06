@@ -1,0 +1,1 @@
+import{_ as s,f as o,g as r,a7 as n}from"./Z8lR5SEQ.js";const t={};function a(e,c){return r(),o("ol",null,[n(e.$slots,"default")])}const _=Object.assign(s(t,[["render",a]]),{__name:"ProseOl"});export{_ as default};

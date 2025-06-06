@@ -1,9 +1,0 @@
----
-description: General coding guidelines
-globs:
-  - '**/*'
-alwaysApply: true
----
-- Avoid code comments; rely on clear variable and function names for readability.
-- Prefer the functional-core, imperative-shell pattern.
-- Avoid using the `any` type in TypeScript.
